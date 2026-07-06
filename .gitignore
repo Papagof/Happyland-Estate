@@ -1,8 +1,16 @@
-# OS
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Env — copy .env.local.example and fill in your values
+.env.local
+
+# OS / editor
 .DS_Store
 Thumbs.db
-
-# Editor
 .vscode/
 .idea/
 *.suo
