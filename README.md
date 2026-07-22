@@ -3,7 +3,7 @@
 A web app for managing residents/landlords, properties, estate management members,
 and service charge payments for Happyland Estate.
 
-Built with [Next.js 15](https://nextjs.org) (App Router), [Tailwind CSS](https://tailwindcss.com), and PostgreSQL. [Supabase](https://supabase.com) tooling is installed but not yet wired in — see [AGENT.md](AGENT.md).
+Built with [Next.js 15](https://nextjs.org) (App Router), [Tailwind CSS](https://tailwindcss.com), and PostgreSQL.
 
 This is a single Next.js app — `app/` (routing) and `public/` (static assets) must stay at the project root, but everything else is split into `backend/` (server-only code) and `frontend/` (client-only code), both imported into `app/` via the `@/*` path alias.
 
@@ -14,10 +14,8 @@ This is a single Next.js app — `app/` (routing) and `public/` (static assets) 
 - `backend/` — server-only code
   - `db.js` — PostgreSQL connection pool
   - `auth.js` — JWT auth helpers (`requireAuth`, `requireAdmin`)
-  - `supabase.js` — Supabase client factory (unused today, scaffolding only)
   - `schema.sql` — PostgreSQL schema
   - `scripts/create-user.js` — admin/staff account creation script
-  - `supabase/` — Supabase CLI local config (`supabase init` output)
 - `frontend/` — client-only code
   - `lib/api-client.js` — fetch wrapper for `/api/*`
   - `context/` — auth context/provider/hook
