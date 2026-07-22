@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { executivesApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
 import LoginForm from '@/frontend/components/LoginForm';
+import Card from '@/frontend/components/ui/Card';
+import Button from '@/frontend/components/ui/Button';
+import Input from '@/frontend/components/ui/Input';
+import Badge from '@/frontend/components/ui/Badge';
+import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true };
 
@@ -25,7 +30,7 @@ export default function ExecutivesPage() {
     if (!executiveForm.name || !executiveForm.position) return;
     if (editingExecutive) {
       const updated = await executivesApi.update(editingExecutive.id, executiveForm);
-      setExecutives(executives.map(ex => ex.id === editingExecutive.id ? updated : ex));
+      setExecutives(executives.map((ex) => (ex.id === editingExecutive.id ? updated : ex)));
       setEditingExecutive(null);
     } else {
       const created = await executivesApi.create(executiveForm);
@@ -36,82 +41,104 @@ export default function ExecutivesPage() {
 
   const handleDelete = async (id) => {
     await executivesApi.remove(id);
-    setExecutives(executives.filter(ex => ex.id !== id));
+    setExecutives(executives.filter((ex) => ex.id !== id));
   };
 
-  const handleEdit = (exec) => { setExecutiveForm(exec); setEditingExecutive(exec); };
-
-  const cardStyle = (active) => ({
-    background: 'white', padding: '20px', borderRadius: '12px',
-    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)',
-    borderTop: `4px solid ${active ? '#10B981' : '#CBD5E1'}`,
-    opacity: active ? 1 : 0.8
-  });
-
-  const badgeStyle = (active) => ({
-    display: 'inline-block', background: active ? '#10B981' : '#CBD5E1', color: 'white',
-    padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', marginBottom: '15px'
-  });
+  const handleEdit = (exec) => {
+    setExecutiveForm(exec);
+    setEditingExecutive(exec);
+  };
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '30px' }}>Estate Management</h1>
-        <div style={{ background: 'white', padding: '30px', borderRadius: '12px', marginBottom: '30px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>
+    <div className="px-5 py-12">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Estate Management</h1>
+
+        <Card className="mt-8">
+          <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">
             {editingExecutive ? 'Edit Management Member' : 'Add Management Member'}
           </h2>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { placeholder: 'Full Name *', key: 'name' },
               { placeholder: 'Position *', key: 'position' },
               { placeholder: 'Term (e.g., 2023-2025)', key: 'term' },
               { placeholder: 'Phone Number', key: 'phone' }
             ].map(({ placeholder, key }) => (
-              <input key={key} type="text" placeholder={placeholder} value={executiveForm[key]} onChange={(e) => setExecutiveForm({...executiveForm, [key]: e.target.value})}
-                style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }} />
+              <Input
+                key={key}
+                type="text"
+                placeholder={placeholder}
+                value={executiveForm[key]}
+                onChange={(e) => setExecutiveForm({ ...executiveForm, [key]: e.target.value })}
+              />
             ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: '#F8FAFC', borderRadius: '8px' }}>
-              <input type="checkbox" checked={executiveForm.isActive} onChange={(e) => setExecutiveForm({...executiveForm, isActive: e.target.checked})} style={{ cursor: 'pointer' }} />
-              <label style={{ cursor: 'pointer' }}>Currently Active</label>
-            </div>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '10px' }}>
-              <button type="submit" style={{ background: '#1E3A8A', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-                {editingExecutive ? 'Update Member' : 'Add Member'}
-              </button>
+            <label className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={executiveForm.isActive}
+                onChange={(e) => setExecutiveForm({ ...executiveForm, isActive: e.target.checked })}
+                className="h-4 w-4 cursor-pointer accent-indigo-600"
+              />
+              Currently Active
+            </label>
+            <div className="flex gap-3 sm:col-span-2 lg:col-span-4">
+              <Button type="submit">{editingExecutive ? 'Update Member' : 'Add Member'}</Button>
               {editingExecutive && (
-                <button type="button" onClick={() => { setEditingExecutive(null); setExecutiveForm(emptyForm); }}
-                  style={{ background: '#94A3B8', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setEditingExecutive(null);
+                    setExecutiveForm(emptyForm);
+                  }}
+                >
                   Cancel
-                </button>
+                </Button>
               )}
             </div>
           </form>
-        </div>
+        </Card>
 
         {['Current Management', 'Past Management'].map((heading, sectionIdx) => {
           const isActive = sectionIdx === 0;
-          const list = executives.filter(e => e.isActive === isActive);
+          const list = executives.filter((e) => e.isActive === isActive);
           if (list.length === 0) return null;
           return (
-            <div key={heading} style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>{heading}</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-                {list.map(executive => (
-                  <div key={executive.id} style={cardStyle(isActive)}>
-                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '10px' }}>{executive.name}</div>
-                    <div style={badgeStyle(isActive)}>{executive.position}</div>
-                    <div style={{ fontSize: '14px', color: '#64748B', marginBottom: '15px' }}>
-                      {executive.term && <div><strong>Term:</strong> {executive.term}</div>}
-                      {executive.phone && <div><strong>Phone:</strong> {executive.phone}</div>}
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', paddingTop: '15px', borderTop: '1px solid #EEE' }}>
-                      {isActive && (
-                        <button onClick={() => handleEdit(executive)} style={{ flex: 1, background: '#14B8A6', color: 'white', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Edit</button>
-                      )}
-                      <button onClick={() => handleDelete(executive.id)} style={{ flex: 1, background: '#EF4444', color: 'white', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Delete</button>
-                    </div>
-                  </div>
+            <div key={heading} className="mt-10">
+              <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">{heading}</h2>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {list.map((executive, idx) => (
+                  <Reveal key={executive.id} delay={Math.min(idx, 6) * 60}>
+                    <Card className={`h-full border-t-4 ${isActive ? 'border-t-emerald-500' : 'border-t-slate-300 opacity-80 dark:border-t-slate-700'}`}>
+                      <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{executive.name}</div>
+                      <Badge color={isActive ? 'emerald' : 'slate'} className="mb-4">
+                        {executive.position}
+                      </Badge>
+                      <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
+                        {executive.term && (
+                          <div>
+                            <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {executive.term}
+                          </div>
+                        )}
+                        {executive.phone && (
+                          <div>
+                            <strong className="text-slate-700 dark:text-slate-300">Phone:</strong> {executive.phone}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+                        {isActive && (
+                          <Button variant="accent" className="flex-1" onClick={() => handleEdit(executive)}>
+                            Edit
+                          </Button>
+                        )}
+                        <Button variant="danger" className="flex-1" onClick={() => handleDelete(executive.id)}>
+                          Delete
+                        </Button>
+                      </div>
+                    </Card>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -119,9 +146,7 @@ export default function ExecutivesPage() {
         })}
 
         {executives.length === 0 && (
-          <div style={{ background: 'white', padding: '40px', borderRadius: '12px', textAlign: 'center', color: '#94A3B8' }}>
-            No management members added yet.
-          </div>
+          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No management members added yet.</Card>
         )}
       </div>
     </div>

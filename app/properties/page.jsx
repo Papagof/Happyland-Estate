@@ -3,8 +3,21 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { propertiesApi } from '@/frontend/lib/api-client';
+import Card from '@/frontend/components/ui/Card';
+import Button from '@/frontend/components/ui/Button';
+import Input from '@/frontend/components/ui/Input';
+import Select from '@/frontend/components/ui/Select';
+import Textarea from '@/frontend/components/ui/Textarea';
+import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { streetName: '', houseNumber: '', type: 'rent', bedrooms: '', bathrooms: '', price: '', description: '', available: true };
+
+const TYPE_LABEL = { sale: 'FOR SALE', rent: 'FOR RENT', both: 'FOR RENT & SALE' };
+const TYPE_BANNER = {
+  sale: 'bg-indigo-600',
+  rent: 'bg-emerald-600',
+  both: 'bg-teal-600'
+};
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState([]);
@@ -24,18 +37,17 @@ export default function PropertiesPage() {
 
   const handleDelete = async (id) => {
     await propertiesApi.remove(id);
-    setProperties(properties.filter(p => p.id !== id));
+    setProperties(properties.filter((p) => p.id !== id));
   };
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '30px' }}>
-          Properties Available for Rent & Sale
-        </h1>
-        <div style={{ background: 'white', padding: '30px', borderRadius: '12px', marginBottom: '30px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>Add New Property</h2>
-          <form onSubmit={handleAdd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+    <div className="px-5 py-12">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Properties Available for Rent & Sale</h1>
+
+        <Card className="mt-8">
+          <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Add New Property</h2>
+          <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { placeholder: 'Street Name *', key: 'streetName', type: 'text' },
               { placeholder: 'House Number *', key: 'houseNumber', type: 'text' },
@@ -43,69 +55,89 @@ export default function PropertiesPage() {
               { placeholder: 'Bathrooms', key: 'bathrooms', type: 'number' },
               { placeholder: 'Price (₦)', key: 'price', type: 'number' }
             ].map(({ placeholder, key, type }) => (
-              <input key={key} type={type} placeholder={placeholder} value={propertyForm[key]}
-                onChange={(e) => setPropertyForm({...propertyForm, [key]: e.target.value})}
-                style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }} />
+              <Input
+                key={key}
+                type={type}
+                placeholder={placeholder}
+                value={propertyForm[key]}
+                onChange={(e) => setPropertyForm({ ...propertyForm, [key]: e.target.value })}
+              />
             ))}
-            <select value={propertyForm.type} onChange={(e) => setPropertyForm({...propertyForm, type: e.target.value})}
-              style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}>
+            <Select value={propertyForm.type} onChange={(e) => setPropertyForm({ ...propertyForm, type: e.target.value })}>
               <option value="rent">For Rent</option>
               <option value="sale">For Sale</option>
               <option value="both">Both Rent & Sale</option>
-            </select>
-            <textarea placeholder="Description" value={propertyForm.description}
-              onChange={(e) => setPropertyForm({...propertyForm, description: e.target.value})}
-              style={{ gridColumn: '1 / -1', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', minHeight: '100px', resize: 'vertical' }} />
-            <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <input type="checkbox" checked={propertyForm.available} onChange={(e) => setPropertyForm({...propertyForm, available: e.target.checked})} style={{ cursor: 'pointer' }} />
-              <label style={{ cursor: 'pointer' }}>Available Now</label>
-            </div>
-            <button type="submit" style={{ gridColumn: '1 / -1', background: '#1E3A8A', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-              <Plus size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Add Property
-            </button>
+            </Select>
+            <Textarea
+              placeholder="Description"
+              value={propertyForm.description}
+              onChange={(e) => setPropertyForm({ ...propertyForm, description: e.target.value })}
+              className="sm:col-span-2 lg:col-span-3"
+            />
+            <label className="flex items-center gap-2.5 text-sm font-medium text-slate-700 sm:col-span-2 lg:col-span-3 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={propertyForm.available}
+                onChange={(e) => setPropertyForm({ ...propertyForm, available: e.target.checked })}
+                className="h-4 w-4 cursor-pointer accent-indigo-600"
+              />
+              Available Now
+            </label>
+            <Button type="submit" className="sm:col-span-2 lg:col-span-3">
+              <Plus size={18} /> Add Property
+            </Button>
           </form>
-        </div>
+        </Card>
+
         {properties.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-            {properties.map(property => (
-              <div key={property.id} style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)' }}>
-                <div style={{ background: property.type === 'sale' ? '#2563EB' : property.type === 'rent' ? '#10B981' : '#14B8A6', padding: '15px', color: 'white' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '5px', opacity: 0.9 }}>
-                    {property.type === 'sale' ? 'FOR SALE' : property.type === 'rent' ? 'FOR RENT' : 'FOR RENT & SALE'}
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {properties.map((property, idx) => (
+              <Reveal key={property.id} delay={Math.min(idx, 6) * 60}>
+                <Card className="h-full overflow-hidden p-0!">
+                  <div className={`px-5 py-4 text-white ${TYPE_BANNER[property.type] || TYPE_BANNER.rent}`}>
+                    <div className="mb-1 text-xs font-bold tracking-wide opacity-90">{TYPE_LABEL[property.type] || TYPE_LABEL.rent}</div>
+                    <div className="text-lg font-bold">
+                      {property.streetName}, {property.houseNumber}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{property.streetName}, {property.houseNumber}</div>
-                </div>
-                <div style={{ padding: '20px' }}>
-                  {!property.available && (
-                    <div style={{ background: '#FFF3CD', color: '#856404', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', marginBottom: '15px', fontWeight: 'bold' }}>Currently Unavailable</div>
-                  )}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                    {property.bedrooms && (
-                      <div style={{ background: '#F8FAFC', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1E3A8A' }}>{property.bedrooms}</div>
-                        <div style={{ fontSize: '12px', color: '#64748B' }}>Bedrooms</div>
+                  <div className="p-5">
+                    {!property.available && (
+                      <div className="mb-4 rounded-md bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                        Currently Unavailable
                       </div>
                     )}
-                    {property.bathrooms && (
-                      <div style={{ background: '#F8FAFC', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1E3A8A' }}>{property.bathrooms}</div>
-                        <div style={{ fontSize: '12px', color: '#64748B' }}>Bathrooms</div>
+                    <div className="mb-4 grid grid-cols-2 gap-2.5">
+                      {property.bedrooms && (
+                        <div className="rounded-md bg-slate-50 p-2.5 text-center dark:bg-slate-800">
+                          <div className="text-base font-bold text-slate-900 dark:text-white">{property.bedrooms}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">Bedrooms</div>
+                        </div>
+                      )}
+                      {property.bathrooms && (
+                        <div className="rounded-md bg-slate-50 p-2.5 text-center dark:bg-slate-800">
+                          <div className="text-base font-bold text-slate-900 dark:text-white">{property.bathrooms}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">Bathrooms</div>
+                        </div>
+                      )}
+                    </div>
+                    {property.price && (
+                      <div className="mb-4 text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                        &#8358;{parseInt(property.price, 10).toLocaleString()}
                       </div>
                     )}
+                    {property.description && (
+                      <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{property.description}</p>
+                    )}
+                    <Button variant="danger" className="w-full" onClick={() => handleDelete(property.id)}>
+                      <Trash2 size={14} /> Remove
+                    </Button>
                   </div>
-                  {property.price && <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#10B981', marginBottom: '15px' }}>₦{parseInt(property.price).toLocaleString()}</div>}
-                  {property.description && <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '15px', lineHeight: '1.5' }}>{property.description}</p>}
-                  <button onClick={() => handleDelete(property.id)} style={{ width: '100%', background: '#EF4444', color: 'white', border: 'none', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
-                    <Trash2 size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} /> Remove
-                  </button>
-                </div>
-              </div>
+                </Card>
+              </Reveal>
             ))}
           </div>
         ) : (
-          <div style={{ background: 'white', padding: '40px', borderRadius: '12px', textAlign: 'center', color: '#94A3B8' }}>
-            No properties listed yet.
-          </div>
+          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No properties listed yet.</Card>
         )}
       </div>
     </div>

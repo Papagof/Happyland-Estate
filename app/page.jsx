@@ -2,11 +2,48 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ShieldCheck, Wrench, Trees, Sparkles, Users, CalendarDays, MapPin, Building, ArrowRight } from 'lucide-react';
 import { residentsApi, executivesApi, propertiesApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
+import Card from '@/frontend/components/ui/Card';
+import Reveal from '@/frontend/components/ui/Reveal';
+import { buttonClasses } from '@/frontend/components/ui/Button';
+import { useInView } from '@/frontend/lib/useInView';
+import { useCountUp } from '@/frontend/lib/useCountUp';
+
+const FEATURES = [
+  { icon: ShieldCheck, title: '24/7 Security & CCTV', description: 'Round-the-clock monitoring and gated access keep every household safe.' },
+  { icon: Wrench, title: 'Well-Maintained Infrastructure', description: 'Paved roads, street lighting, and reliable utilities, maintained year-round.' },
+  { icon: Trees, title: 'Recreational Spaces', description: 'Green spaces and community facilities for residents of every age.' },
+  { icon: Sparkles, title: 'Regular Maintenance', description: 'Proactive upkeep and cleaning across all shared estate areas.' },
+  { icon: Users, title: 'Efficient Management', description: 'A dedicated executive team handling estate affairs transparently.' },
+  { icon: CalendarDays, title: 'Community Events', description: 'Regular gatherings that keep neighbors connected year-round.' }
+];
+
+function StatCard({ icon: Icon, value, label, delay }) {
+  const [ref, inView] = useInView({ threshold: 0.4 });
+  const displayValue = useCountUp(value, { start: inView, duration: 1400 });
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+      style={{ transitionDelay: inView ? `${delay}ms` : '0ms' }}
+    >
+      <Card className="h-full transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-900/10">
+        <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+          <Icon size={20} />
+        </div>
+        <div className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">{displayValue.toLocaleString()}</div>
+        <div className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">{label}</div>
+      </Card>
+    </div>
+  );
+}
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [residentCount, setResidentCount] = useState(0);
   const [activeExecutiveCount, setActiveExecutiveCount] = useState(0);
@@ -26,77 +63,94 @@ export default function HomePage() {
   }, [isAuthenticated]);
 
   const displayResidentCount = isAuthenticated ? residents.length : residentCount;
-  const displayActiveExecutiveCount = isAuthenticated ? executives.filter(e => e.isActive).length : activeExecutiveCount;
+  const displayActiveExecutiveCount = isAuthenticated ? executives.filter((e) => e.isActive).length : activeExecutiveCount;
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #200583 50%, #d7401a 100%)',
-          color: 'white',
-          padding: '60px 40px',
-          borderRadius: '16px',
-          marginBottom: '40px',
-          boxShadow: '0 10px 40px rgba(37, 99, 235, 0.25)',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: '40px'
-        }}>
-          <div style={{ flex: '1 1 320px' }}>
-            <h1 style={{ fontSize: '40px', fontWeight: 'bold', marginBottom: '15px', color: 'white' }}>
-              Building More Than Homes...
-            </h1>
-            <p style={{ fontSize: '24px', marginBottom: '20px', color: '#E2E8F0' }}>
-              Creating Communities for Modern Living.
-            </p>
-            <p style={{ fontSize: '16px', color: '#E2E8F0', lineHeight: '1.6' }}>
-              Welcome to Happyland Estate - A premier residential community dedicated to providing a safe, comfortable, and thriving environment for all our residents and property owners.
-            </p>
-          </div>
-          <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '480px', width: '100%', height: '300px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.3)' }}>
-            <Image
-              src="/estate-gate.jpg"
-              alt="Happyland Estate entrance gate"
-              fill
-              sizes="(max-width: 768px) 100vw, 480px"
-              style={{ objectFit: 'cover' }}
-              priority
-            />
-          </div>
-        </div>
+    <div className="px-5 py-12 sm:py-16">
+      <div className="mx-auto max-w-6xl">
+        {/* Hero */}
+        <section className="relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 animate-blob rounded-full bg-indigo-300/30 blur-3xl dark:bg-indigo-500/10" />
+          <div className="pointer-events-none absolute -top-16 right-0 h-72 w-72 animate-blob rounded-full bg-teal-300/30 blur-3xl [animation-delay:3s] dark:bg-teal-500/10" />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          {[
-            { count: displayResidentCount, label: 'Residents & Landlords', color: '#b91010' },
-            { count: properties.filter(p => p.available).length, label: 'Available Properties', color: '#2563EB' },
-            { count: displayActiveExecutiveCount, label: 'Active Management', color: '#b81414' }
-          ].map((stat, idx) => (
-            <div key={idx} style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)', border: `4px solid ${stat.color}` }}>
-              <div style={{ fontSize: '40px', fontWeight: 'bold', color: stat.color, marginBottom: '10px' }}>{stat.count}</div>
-              <div style={{ fontSize: '16px', color: '#64748B' }}>{stat.label}</div>
+          <div className="relative grid items-center gap-12 pb-16 lg:grid-cols-2">
+            <div>
+              <Reveal>
+                <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-700 uppercase dark:bg-indigo-500/10 dark:text-indigo-300">
+                  Oko-Ado &middot; Lekki-Epe Expressway, Lagos
+                </span>
+              </Reveal>
+              <Reveal delay={100}>
+                <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+                  Building more than homes
+                  <span className="block bg-linear-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent">
+                    creating thriving communities.
+                  </span>
+                </h1>
+              </Reveal>
+              <Reveal delay={200}>
+                <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+                  Welcome to Happyland Estate — a premier residential community dedicated to providing a safe,
+                  comfortable, and thriving environment for all our residents and property owners.
+                </p>
+              </Reveal>
+              <Reveal delay={300}>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link href="/properties" className={`group ${buttonClasses('primary')}`}>
+                    View Properties
+                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                  <Link href="/about" className={buttonClasses('secondary')}>
+                    About the Estate
+                  </Link>
+                </div>
+              </Reveal>
             </div>
-          ))}
-        </div>
 
-        <div style={{ background: 'white', padding: '40px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>Estate Features</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-            {[
-              '24/7 Security & CCTV Monitoring',
-              'Well-Maintained Roads & Infrastructure',
-              'Recreational Facilities',
-              'Regular Maintenance & Cleaning',
-              'Efficient Estate Management',
-              'Community Events & Activities'
-            ].map((feature, idx) => (
-              <div key={idx} style={{ padding: '15px', background: '#F8FAFC', borderRadius: '8px', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '8px', height: '8px', background: '#14B8A6', borderRadius: '50%' }} />
-                {feature}
+            <Reveal delay={200} className="relative">
+              <div className="relative h-80 w-full animate-float overflow-hidden rounded-3xl shadow-2xl shadow-indigo-900/20">
+                <Image
+                  src="/estate-gate.jpg"
+                  alt="Happyland Estate entrance gate"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  style={{ objectFit: 'cover' }}
+                  priority
+                />
               </div>
-            ))}
+            </Reveal>
           </div>
-        </div>
+        </section>
+
+        {/* Stats */}
+        <section className="grid gap-5 sm:grid-cols-3">
+          <StatCard icon={Users} value={displayResidentCount} label="Residents & Landlords" delay={0} />
+          <StatCard icon={MapPin} value={properties.filter((p) => p.available).length} label="Available Properties" delay={100} />
+          <StatCard icon={Building} value={displayActiveExecutiveCount} label="Active Management" delay={200} />
+        </section>
+
+        {/* Features */}
+        <section className="mt-16">
+          <Reveal>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Estate Features</h2>
+          </Reveal>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature, idx) => {
+              const Icon = feature.icon;
+              return (
+                <Reveal key={feature.title} delay={idx * 80}>
+                  <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-900/10 dark:hover:border-indigo-800">
+                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400">
+                      <Icon size={18} />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{feature.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{feature.description}</p>
+                  </Card>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );

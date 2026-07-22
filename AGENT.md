@@ -15,18 +15,28 @@ Single Next.js 15 App Router app — not a monorepo, not two deployable services
   - `supabase/` — local Supabase CLI config from `supabase init` (no Docker on this machine, so no live local stack — CLI use is limited to project linking/migrations against a remote project)
 - `frontend/` — client-only code (everything here assumes it runs in the browser)
   - `lib/api-client.js` — the only place `fetch('/api/...')` should be called from pages; every resource has a `xApi` object (`residentsApi`, `executivesApi`, etc.) with `list/create/update/remove` methods
-  - `context/` — `AuthContext.jsx` (provider, holds `user` in `localStorage` under `happyland_user`), `auth-context.js` (the raw `createContext`), `useAuth.js` (the hook) — kept as three files on purpose, don't collapse them
-  - `components/` — `Navbar.jsx` (nav items + visibility rules live in its `NAV_ITEMS` array) and `LoginForm.jsx` (rendered inline by pages that require auth, not routed to directly)
-  - `styles/globals.css` — starts with `@import "tailwindcss";`, then the app's CSS custom properties and a minimal reset
+  - `lib/useInView.js` / `lib/useCountUp.js` — animation hooks (IntersectionObserver-based reveal, and a `requestAnimationFrame` count-up), used by the homepage
+  - `context/` — `AuthContext.jsx`/`auth-context.js`/`useAuth.js` (auth) and `ThemeContext.jsx`/`theme-context.js`/`useTheme.js` (light/dark mode) — each kept as three files (provider, raw context, hook) on purpose, don't collapse them
+  - `components/` — `Navbar.jsx` (nav items + visibility rules live in its `NAV_ITEMS` array), `ThemeToggle.jsx` (sun/moon switch, lives in the navbar), `LoginForm.jsx` (rendered inline by pages that require auth, not routed to directly)
+  - `components/ui/` — the shared design-system primitives (see Styling below)
+  - `styles/globals.css` — Tailwind v4 entrypoint: `@import "tailwindcss"`, the `@custom-variant dark` definition, custom `@theme` animations (`blob`, `float`, `fade-in-up`), and the base layer
 - `app/api/**/route.js` — one file per REST resource, following a consistent shape: a private `toX(row)` mapper (snake_case DB row → camelCase JSON), `requireAuth`/`requireAdmin` guard at the top of handlers that need it, `pool.query` with parameterized `$1, $2, ...`
 
 Path alias: `@/*` → project root (`jsconfig.json`), so imports are `@/backend/db`, `@/frontend/lib/api-client`, etc.
 
 ## Styling
 
-Every existing page/component uses inline `style={{...}}` objects — this is the current convention, not an oversight. Tailwind CSS v4 is installed and wired into `frontend/styles/globals.css` (CSS-first config, no `tailwind.config.js`) but has **not** been applied to any existing markup. New work may use Tailwind utility classes; don't silently convert existing inline styles to Tailwind as a drive-by change.
+Every page uses Tailwind v4 utility classes (CSS-first config, no `tailwind.config.js` — theme customization lives in `frontend/styles/globals.css`'s `@theme` block) plus a small shared design system in `frontend/components/ui/`:
 
-Tailwind v4's Preflight base reset is active, which changes default browser styling for unstyled elements (`button`, `input`, `select`, etc.). Existing components mostly set these explicitly via inline styles, so this is expected to be inert, but if you see an unstyled-looking form control, check whether it's missing an inline style rather than assuming Tailwind broke something.
+- `Button.jsx` — variants `primary` (indigo), `secondary` (slate), `accent` (teal, used for in-card "Edit" actions), `success` (emerald, used for the payment confirm action), `danger` (red). Also exports `buttonClasses(variant, className)` for cases that need button styling on a non-`<button>` element (e.g. a `next/link` styled as a CTA) — see the hero in `app/page.jsx`.
+- `Card.jsx` — the standard white/slate-900 rounded surface used for every panel and list item; forwards `ref` (needed for `useInView`).
+- `Input.jsx` / `Select.jsx` / `Textarea.jsx` — form controls sharing `fieldStyles.js`'s `fieldClass` (and `labelClass` for the rare page that renders its own `<label>`).
+- `Badge.jsx` — colored status pills (resident type, user role, executive status, etc.).
+- `Reveal.jsx` — wraps children in a scroll-triggered fade/slide-up (via `useInView`); used for hero text staggering and card-grid entrances across every page. It only animates once actually scrolled into view — a full-page screenshot taken without scrolling will show these sections as empty; that's expected, not a bug.
+
+Adding a new page or card should compose these primitives rather than writing new inline styles or new one-off Tailwind color choices — see [.claude/skills/add-crud-resource/SKILL.md](.claude/skills/add-crud-resource/SKILL.md) for the full pattern.
+
+Dark mode is class-based (`@custom-variant dark (&:where(.dark, .dark *));`), toggled by `frontend/context/ThemeContext.jsx` and persisted to `localStorage` (`happyland_theme`). `app/layout.jsx` has an inline `<script>` (not `next/script`) that sets the `dark` class on `<html>` synchronously before hydration — this is required to avoid a flash of the wrong theme, don't remove it or defer it. Every new component needs both a light and a `dark:` styling — there is no default that silently works for both.
 
 ## Auth pattern
 

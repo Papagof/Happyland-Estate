@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, Home, Users, CreditCard, Info, Building, MapPin, LogIn, LogOut, UserCog } from 'lucide-react';
 import { useAuth } from '@/frontend/context/useAuth';
-import styles from './Navbar.module.css';
+import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home', icon: Home },
@@ -22,7 +22,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const visibleItems = NAV_ITEMS.filter(item => {
+  const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.adminOnly) return user?.role === 'admin';
     return !item.restricted || isAuthenticated;
   });
@@ -39,11 +39,15 @@ export default function Navbar() {
   };
 
   const linkClass = (href) =>
-    `${styles.navbarLink} ${pathname === href ? styles.active : ''}`;
+    `flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+      pathname === href
+        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400'
+        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+    }`;
 
   const navButtons = (
     <>
-      {visibleItems.map(item => {
+      {visibleItems.map((item) => {
         const Icon = item.icon;
         return (
           <button key={item.href} className={linkClass(item.href)} onClick={() => navigate(item.href)}>
@@ -53,7 +57,10 @@ export default function Navbar() {
         );
       })}
       {isAuthenticated ? (
-        <button className={styles.navbarLink} onClick={handleLogout}>
+        <button
+          className="flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          onClick={handleLogout}
+        >
           <LogOut size={16} /> Logout
         </button>
       ) : (
@@ -65,19 +72,41 @@ export default function Navbar() {
   );
 
   return (
-    <header className={styles.navbar}>
-      <div className={styles.navbarInner}>
-        <div className={styles.navbarBrand}>
-          <div className={styles.navbarLogo}>🏘️</div>
-          HAPPYLAND ESTATE
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/80">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
+        <div className="flex items-center gap-2.5 text-base font-bold tracking-tight text-indigo-900 dark:text-indigo-200">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-lg">🏘️</div>
+          <span className="hidden sm:inline">HAPPYLAND ESTATE</span>
         </div>
-        <nav className={styles.navbarLinks}>{navButtons}</nav>
-        <button className={styles.navbarToggle} onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+
+        <nav className="hidden items-center gap-1 lg:flex">{navButtons}</nav>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden lg:block">
+            <ThemeToggle />
+          </div>
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-indigo-900 hover:bg-slate-100 dark:text-indigo-200 dark:hover:bg-slate-800 lg:hidden"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
-      <nav className={`${styles.navbarMobileLinks} ${menuOpen ? styles.open : ''}`}>
-        {navButtons}
+
+      <nav
+        className={`grid gap-1 overflow-hidden border-t border-slate-200/80 px-5 transition-[grid-template-rows,opacity] duration-300 dark:border-slate-800/80 lg:hidden ${
+          menuOpen ? 'grid-rows-[1fr] py-3 opacity-100' : 'grid-rows-[0fr] py-0 opacity-0'
+        }`}
+      >
+        <div className="flex min-h-0 flex-col gap-1">
+          {navButtons}
+          <div className="mt-2 flex items-center justify-between rounded-lg px-3.5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+            Appearance
+            <ThemeToggle />
+          </div>
+        </div>
       </nav>
     </header>
   );

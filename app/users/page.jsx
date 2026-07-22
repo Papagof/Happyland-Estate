@@ -5,6 +5,12 @@ import { Trash2, UserPlus } from 'lucide-react';
 import { usersApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
 import LoginForm from '@/frontend/components/LoginForm';
+import Card from '@/frontend/components/ui/Card';
+import Button from '@/frontend/components/ui/Button';
+import Input from '@/frontend/components/ui/Input';
+import Select from '@/frontend/components/ui/Select';
+import Badge from '@/frontend/components/ui/Badge';
+import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { username: '', password: '', role: 'authorized' };
 
@@ -21,7 +27,7 @@ export default function UsersPage() {
 
   if (!isAuthenticated) return <LoginForm />;
   if (currentUser.role !== 'admin') {
-    return <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94A3B8' }}>Admins only.</div>;
+    return <div className="px-5 py-16 text-center text-slate-400 dark:text-slate-500">Admins only.</div>;
   }
 
   const handleCreate = async (e) => {
@@ -39,55 +45,64 @@ export default function UsersPage() {
 
   const handleDelete = async (id) => {
     await usersApi.remove(id);
-    setUsers(users.filter(u => u.id !== id));
+    setUsers(users.filter((u) => u.id !== id));
   };
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '30px' }}>Authorized User Accounts</h1>
-        <div style={{ background: 'white', padding: '30px', borderRadius: '12px', marginBottom: '30px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>Add New User</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-            <input type="text" placeholder="Username *" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})}
-              style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }} />
-            <input type="password" placeholder="Password *" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
-              style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }} />
-            <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
-              style={{ padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}>
+    <div className="px-5 py-12">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Authorized User Accounts</h1>
+
+        <Card className="mt-8">
+          <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Add New User</h2>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Input
+              type="text"
+              placeholder="Username *"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            />
+            <Input
+              type="password"
+              placeholder="Password *"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            />
+            <Select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })}>
               <option value="authorized">Authorized</option>
               <option value="admin">Admin</option>
-            </select>
-            <div style={{ gridColumn: '1 / -1' }}>
-              {error && <div style={{ color: '#EF4444', fontSize: '14px', marginBottom: '15px' }}>{error}</div>}
-              <button type="submit" style={{ background: '#1E3A8A', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            </Select>
+            <div className="sm:col-span-3">
+              {error && <div className="mb-3 text-sm font-medium text-red-500">{error}</div>}
+              <Button type="submit">
                 <UserPlus size={16} /> Add User
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
+        </Card>
+
         {users.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {users.map(u => (
-              <div key={u.id} style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)', borderLeft: `4px solid ${u.role === 'admin' ? '#1E3A8A' : '#14B8A6'}` }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '8px' }}>{u.username}</div>
-                <div style={{ display: 'inline-block', background: u.role === 'admin' ? '#1E3A8A' : '#14B8A6', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', marginBottom: '15px' }}>
-                  {u.role.toUpperCase()}
-                </div>
-                {u.id !== currentUser.id && (
-                  <div style={{ display: 'flex', paddingTop: '15px', borderTop: '1px solid #EEE' }}>
-                    <button onClick={() => handleDelete(u.id)} style={{ flex: 1, background: '#EF4444', color: 'white', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                      <Trash2 size={14} /> Delete
-                    </button>
-                  </div>
-                )}
-              </div>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {users.map((u, idx) => (
+              <Reveal key={u.id} delay={Math.min(idx, 6) * 60}>
+                <Card className="h-full">
+                  <div className="mb-2 text-lg font-bold text-slate-900 dark:text-white">{u.username}</div>
+                  <Badge color={u.role === 'admin' ? 'indigo' : 'emerald'} className="mb-4">
+                    {u.role.toUpperCase()}
+                  </Badge>
+                  {u.id !== currentUser.id && (
+                    <div className="flex border-t border-slate-100 pt-4 dark:border-slate-800">
+                      <Button variant="danger" className="flex-1" onClick={() => handleDelete(u.id)}>
+                        <Trash2 size={14} /> Delete
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              </Reveal>
             ))}
           </div>
         ) : (
-          <div style={{ background: 'white', padding: '40px', borderRadius: '12px', textAlign: 'center', color: '#94A3B8' }}>
-            No authorized users yet.
-          </div>
+          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No authorized users yet.</Card>
         )}
       </div>
     </div>

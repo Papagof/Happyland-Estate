@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { paymentsApi } from '@/frontend/lib/api-client';
+import Card from '@/frontend/components/ui/Card';
+import Button from '@/frontend/components/ui/Button';
+import Input from '@/frontend/components/ui/Input';
+import Select from '@/frontend/components/ui/Select';
+import { labelClass } from '@/frontend/components/ui/fieldStyles';
 
 export default function PaymentPage() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -19,54 +24,70 @@ export default function PaymentPage() {
   };
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '30px' }}>Service Charge Payment</h1>
+    <div className="px-5 py-12">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Service Charge Payment</h1>
+
         {showPaymentForm && (
-          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '20px' }}>Make a Payment</h2>
-            <div style={{ background: '#E8F4EF', padding: '15px', borderRadius: '8px', marginBottom: '20px', color: '#1E3A8A', fontSize: '14px' }}>
+          <Card className="mt-8 animate-fade-in-up">
+            <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Make a Payment</h2>
+            <div className="mb-5 rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:bg-teal-500/10 dark:text-teal-300">
               <strong>Monthly Service Charge:</strong> ₦15,000 per unit
             </div>
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '15px' }}>
+            <form onSubmit={handleSubmit} className="grid gap-4">
               {[
                 { label: 'Resident Name', key: 'residentName', type: 'text' },
                 { label: 'Property Address', key: 'propertyAddress', type: 'text' },
                 { label: 'Amount (₦)', key: 'amount', type: 'number' }
               ].map(({ label, key, type }) => (
                 <div key={key}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#1E293B' }}>{label}</label>
-                  <input type={type} value={paymentData?.[key] || ''} onChange={(e) => setPaymentData({...paymentData, [key]: e.target.value})}
-                    style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  <label className={labelClass}>{label}</label>
+                  <Input
+                    type={type}
+                    value={paymentData?.[key] || ''}
+                    onChange={(e) => setPaymentData({ ...paymentData, [key]: e.target.value })}
+                  />
                 </div>
               ))}
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#1E293B' }}>Payment Method</label>
-                <select value={paymentData?.method || 'bank_transfer'} onChange={(e) => setPaymentData({...paymentData, method: e.target.value})}
-                  style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box' }}>
+                <label className={labelClass}>Payment Method</label>
+                <Select value={paymentData?.method || 'bank_transfer'} onChange={(e) => setPaymentData({ ...paymentData, method: e.target.value })}>
                   <option value="bank_transfer">Bank Transfer</option>
                   <option value="card">Debit Card</option>
                   <option value="mobile_money">Mobile Money</option>
                   <option value="cash">Cash Payment</option>
-                </select>
+                </Select>
               </div>
-              <div style={{ display: 'flex', gap: '10px', paddingTop: '15px' }}>
-                <button type="submit" style={{ flex: 1, background: '#10B981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+              <div className="flex gap-3 pt-2">
+                <Button type="submit" variant="success" className="flex-1">
                   Process Payment
-                </button>
-                <button type="button" onClick={() => { setShowPaymentForm(false); setPaymentData(null); }}
-                  style={{ flex: 1, background: '#94A3B8', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowPaymentForm(false);
+                    setPaymentData(null);
+                  }}
+                >
                   Cancel
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         )}
+
         {!showPaymentForm && (
-          <button onClick={() => { setShowPaymentForm(true); setPaymentData({ residentName: '', propertyAddress: '', amount: '' }); }}
-            style={{ width: '100%', background: '#1E3A8A', color: 'white', padding: '15px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
-            <Plus size={20} style={{ marginRight: '10px', verticalAlign: 'middle' }} /> Make New Payment
-          </button>
+          <Button
+            className="mt-8 w-full py-4 text-base"
+            onClick={() => {
+              setShowPaymentForm(true);
+              setPaymentData({ residentName: '', propertyAddress: '', amount: '' });
+            }}
+          >
+            <Plus size={20} /> Make New Payment
+          </Button>
         )}
       </div>
     </div>

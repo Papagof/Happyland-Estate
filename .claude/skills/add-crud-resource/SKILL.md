@@ -21,10 +21,18 @@ This app has one consistent pattern for a resource backed by a Postgres table, a
 
 4. **Client methods** — add a `<resource>Api` object to `frontend/lib/api-client.js` with `list/create/update/remove` (and `count`/any custom read endpoint if needed, see `residentsApi.count` and `executivesApi.activeCount` for the pattern of a separate lightweight count route). Every method just calls the shared `request(path, options)` helper already defined in that file.
 
-5. **Page** — `app/<resource>/page.jsx`, `'use client'`. Copy the shape of `app/residents/page.jsx` for an authenticated CRUD page (guards on `useAuth()`, renders `<LoginForm />` if not authenticated) or `app/properties/page.jsx` for a public one: an `emptyForm` constant, `useState` for the list + form + (if editable) an `editingX` record, a `useEffect` that fetches on mount (or on `isAuthenticated` change), a form built from a small array of `{ type, placeholder, key }` field descriptors mapped to `<input>`s, and a card grid rendering the list with Edit/Delete buttons. Reuse the existing inline `style={{...}}` values from a sibling page rather than inventing new colors/spacing — the app has no shared style constants, visual consistency comes from copying values directly (`#1E3A8A` primary, `#F8FAFC` background, `12px` border radius, `0 4px 12px rgba(15, 23, 42, 0.06)` card shadow, etc.).
+5. **Page** — `app/<resource>/page.jsx`, `'use client'`. Copy the shape of `app/residents/page.jsx` for an authenticated CRUD page (guards on `useAuth()`, renders `<LoginForm />` if not authenticated) or `app/properties/page.jsx` for a public one: an `emptyForm` constant, `useState` for the list + form + (if editable) an `editingX` record, a `useEffect` that fetches on mount (or on `isAuthenticated` change), a form built from a small array of `{ type, placeholder, key }` field descriptors mapped to `<Input>`s, and a card grid rendering the list with Edit/Delete buttons.
+
+   Compose the page from the shared primitives in `frontend/components/ui/` — don't write new inline styles or new Tailwind color choices:
+   - `Card` for the form panel and every list item (`import Card from '@/frontend/components/ui/Card'`)
+   - `Input` / `Select` / `Textarea` for form fields, `Button` (`variant="primary"` submit, `variant="secondary"` cancel, `variant="accent"` for an in-card Edit action, `variant="danger"` for Delete)
+   - `Badge` for any status/type pill (`color="indigo"`, `"emerald"`, `"slate"`, `"red"`, or `"amber"`)
+   - `Reveal` wrapping each card in the list grid, with a staggered `delay={Math.min(idx, 6) * 60}`, so new entries fade/slide in on scroll the same way every other list does
+
+   Every page and every primitive needs both a light styling and a `dark:` variant — check the new page in dark mode before considering it done (toggle via the navbar's theme button).
 
 6. **Nav entry** — add `{ href: '/<resource>', label: '...', icon: <LucideIcon>, restricted: true }` to `NAV_ITEMS` in `frontend/components/Navbar.jsx` (omit `restricted` for public resources, use `adminOnly: true` instead if it should match the Users page's admin-gating).
 
 ## Verify
 
-Run `npm run build` — it must stay clean (no new ESLint warnings, no type errors). Then `npm run dev`, sign in via `/login`, and exercise create/edit/delete on the new page manually — there's no test suite, this is the only verification available.
+Run `npm run build` — it must stay clean (no new ESLint warnings, no type errors). Then `npm run dev`, sign in via `/login`, and exercise create/edit/delete on the new page manually in both light and dark mode (toggle via the navbar) — there's no test suite, this is the only verification available.
