@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, Home, Users, CreditCard, Info, Building, MapPin, LogIn, LogOut, UserCog } from 'lucide-react';
+import { Menu, X, Home, Users, CreditCard, Info, Building, MapPin, Mail, LogIn, LogOut, UserCog } from 'lucide-react';
 import { useAuth } from '@/frontend/context/useAuth';
 import ThemeToggle from './ThemeToggle';
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/about', label: 'About Estate', icon: Info },
   { href: '/executives', label: 'Management', icon: Building, restricted: true },
   { href: '/properties', label: 'Properties', icon: MapPin },
+  { href: '/contact', label: 'Contact', icon: Mail },
   { href: '/users', label: 'User Accounts', icon: UserCog, adminOnly: true }
 ];
 

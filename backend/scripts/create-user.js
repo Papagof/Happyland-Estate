@@ -1,5 +1,5 @@
-// Creates or updates an admin/authorized login account.
-// Usage: node scripts/create-user.js <username> <password> [admin|authorized]
+// Creates or updates an admin/staff login account.
+// Usage: node scripts/create-user.js <username> <password> [admin|staff]
 require('dotenv').config({ path: '.env.local' });
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
@@ -13,14 +13,14 @@ const pool = new Pool({
 });
 
 async function main() {
-  const [username, password, role = 'authorized'] = process.argv.slice(2);
+  const [username, password, role = 'staff'] = process.argv.slice(2);
 
   if (!username || !password) {
-    console.error('Usage: node scripts/create-user.js <username> <password> [admin|authorized]');
+    console.error('Usage: node scripts/create-user.js <username> <password> [admin|staff]');
     process.exit(1);
   }
-  if (!['admin', 'authorized'].includes(role)) {
-    console.error('role must be "admin" or "authorized"');
+  if (!['admin', 'staff'].includes(role)) {
+    console.error('role must be "admin" or "staff"');
     process.exit(1);
   }
 

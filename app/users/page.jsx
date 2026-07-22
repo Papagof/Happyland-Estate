@@ -12,7 +12,7 @@ import Select from '@/frontend/components/ui/Select';
 import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 
-const emptyForm = { username: '', password: '', role: 'authorized' };
+const emptyForm = { username: '', password: '', role: 'staff' };
 
 export default function UsersPage() {
   const { isAuthenticated, user: currentUser } = useAuth();
@@ -51,7 +51,7 @@ export default function UsersPage() {
   return (
     <div className="px-5 py-12">
       <div className="mx-auto max-w-4xl">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Authorized User Accounts</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">User Accounts</h1>
 
         <Card className="mt-8">
           <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Add New User</h2>
@@ -69,7 +69,7 @@ export default function UsersPage() {
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
             <Select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })}>
-              <option value="authorized">Authorized</option>
+              <option value="staff">Staff</option>
               <option value="admin">Admin</option>
             </Select>
             <div className="sm:col-span-3">
@@ -102,7 +102,7 @@ export default function UsersPage() {
             ))}
           </div>
         ) : (
-          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No authorized users yet.</Card>
+          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No user accounts yet.</Card>
         )}
       </div>
     </div>

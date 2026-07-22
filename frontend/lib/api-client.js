@@ -61,3 +61,7 @@ export const paymentsApi = {
   list: () => request('/payments'),
   create: (data) => request('/payments', { method: 'POST', body: JSON.stringify(data) })
 };
+
+export const contactApi = {
+  create: (data) => request('/contact', { method: 'POST', body: JSON.stringify(data) })
+};

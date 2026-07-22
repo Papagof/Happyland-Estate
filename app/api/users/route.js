@@ -23,15 +23,15 @@ export async function POST(request) {
   if (!username || !password) {
     return NextResponse.json({ error: 'username and password are required' }, { status: 400 });
   }
-  if (role && !['admin', 'authorized'].includes(role)) {
-    return NextResponse.json({ error: 'role must be "admin" or "authorized"' }, { status: 400 });
+  if (role && !['admin', 'staff'].includes(role)) {
+    return NextResponse.json({ error: 'role must be "admin" or "staff"' }, { status: 400 });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
   try {
     const result = await pool.query(
       `INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3) RETURNING *`,
-      [username, passwordHash, role || 'authorized']
+      [username, passwordHash, role || 'staff']
     );
     return NextResponse.json(toUser(result.rows[0]), { status: 201 });
   } catch (err) {

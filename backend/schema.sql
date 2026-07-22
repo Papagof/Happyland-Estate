@@ -1,11 +1,11 @@
 -- Happyland Estate database schema
--- Usage: createdb happyland_estate && psql -d happyland_estate -f db/schema.sql
+-- Usage: createdb happyland_estate && psql -d happyland_estate -f backend/schema.sql
 
 CREATE TABLE IF NOT EXISTS users (
   id            SERIAL PRIMARY KEY,
   username      TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  role          TEXT NOT NULL DEFAULT 'authorized' CHECK (role IN ('admin', 'authorized')),
+  role          TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('admin', 'staff')),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -50,4 +50,13 @@ CREATE TABLE IF NOT EXISTS payments (
   amount            NUMERIC NOT NULL,
   method            TEXT NOT NULL DEFAULT 'bank_transfer',
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  email       TEXT NOT NULL,
+  subject     TEXT,
+  message     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );

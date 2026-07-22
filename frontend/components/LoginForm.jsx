@@ -37,7 +37,7 @@ export default function LoginForm({ onSuccess }) {
           <h1 className="text-xl font-bold text-slate-900 dark:text-white">Authorized Access Only</h1>
         </div>
         <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          This page is restricted to estate admins and authorized personnel.
+          This page is restricted to estate admins and staff.
         </p>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div>

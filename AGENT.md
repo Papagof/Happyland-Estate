@@ -11,7 +11,7 @@ Single Next.js 15 App Router app — not a monorepo, not two deployable services
   - `auth.js` — `getUser(request)`, `requireAuth(request)`, `requireAdmin(request)` — JWT verification against `process.env.JWT_SECRET`
   - `supabase.js` — `createSupabaseClient()` / `createSupabaseAdminClient()`, **not called anywhere yet**. The app's real data layer is still `db.js` + `auth.js`. Don't assume Supabase is live without checking.
   - `schema.sql` — the only source of truth for table shape; there is no ORM
-  - `scripts/create-user.js` — run with `node backend/scripts/create-user.js <username> <password> [admin|authorized]`
+  - `scripts/create-user.js` — run with `node backend/scripts/create-user.js <username> <password> [admin|staff]`
   - `supabase/` — local Supabase CLI config from `supabase init` (no Docker on this machine, so no live local stack — CLI use is limited to project linking/migrations against a remote project)
 - `frontend/` — client-only code (everything here assumes it runs in the browser)
   - `lib/api-client.js` — the only place `fetch('/api/...')` should be called from pages; every resource has a `xApi` object (`residentsApi`, `executivesApi`, etc.) with `list/create/update/remove` methods
@@ -40,10 +40,13 @@ Dark mode is class-based (`@custom-variant dark (&:where(.dark, .dark *));`), to
 
 ## Auth pattern
 
+Two roles, both on the `users.role` column: `admin` (full access, including managing other accounts via `/api/users`) and `staff` (can manage Residents & Executives, cannot manage accounts). There is no third tier — a new permission boundary means a new role value plus a new `requireX` guard in `backend/auth.js`, not an ad-hoc check scattered in a route handler.
+
 - Login: `POST /api/auth/login` → bcrypt-compares against `users.password_hash`, signs a JWT with `{ sub, username, role }`, 12h expiry
 - Client stores the token via `frontend/lib/api-client.js`'s `setToken`/`getToken`/`clearToken` (`localStorage` key `happyland_token`) and the user object via `AuthContext` (`localStorage` key `happyland_user`)
 - Every authenticated request goes through `frontend/lib/api-client.js`'s `request()`, which attaches `Authorization: Bearer <token>` automatically
-- Server-side: call `requireAuth(request)` or `requireAdmin(request)` as the first line of a route handler; both return `{ user, error }` — return `error` immediately if present
+- Server-side: call `requireAuth(request)` for "any signed-in user" or `requireAdmin(request)` for "admin only" as the first line of a route handler; both return `{ user, error }` — return `error` immediately if present
+- Client-side gating mirrors this: `useAuth()`'s `user.role` drives `adminOnly`/`restricted` flags in `Navbar.jsx`'s `NAV_ITEMS`, and pages that need the admin tier check `currentUser.role !== 'admin'` directly (see `app/users/page.jsx`)
 
 ## Commands
 
@@ -51,7 +54,7 @@ Dark mode is class-based (`@custom-variant dark (&:where(.dark, .dark *));`), to
 - `npm run build` — production build (also runs ESLint + type checking)
 - `npm run lint` — ESLint only
 - `psql -d happyland_estate -f backend/schema.sql` — (re)load schema
-- `node backend/scripts/create-user.js <username> <password> [admin|authorized]` — create/update a login
+- `node backend/scripts/create-user.js <username> <password> [admin|staff]` — create/update a login
 
 ## Environment
 

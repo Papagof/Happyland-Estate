@@ -16,7 +16,7 @@ This is a single Next.js app — `app/` (routing) and `public/` (static assets) 
   - `auth.js` — JWT auth helpers (`requireAuth`, `requireAdmin`)
   - `supabase.js` — Supabase client factory (unused today, scaffolding only)
   - `schema.sql` — PostgreSQL schema
-  - `scripts/create-user.js` — admin/authorized account creation script
+  - `scripts/create-user.js` — admin/staff account creation script
   - `supabase/` — Supabase CLI local config (`supabase init` output)
 - `frontend/` — client-only code
   - `lib/api-client.js` — fetch wrapper for `/api/*`
@@ -51,15 +51,15 @@ Generate a `JWT_SECRET` with:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-#### Creating admin / authorized logins
+#### Creating admin / staff logins
 
 The Residents & Landlords, Management, and User Accounts pages require signing in. Create accounts with:
 
 ```sh
-node backend/scripts/create-user.js <username> <password> [admin|authorized]
+node backend/scripts/create-user.js <username> <password> [admin|staff]
 ```
 
-Running it again for an existing username updates that user's password/role.
+Running it again for an existing username updates that user's password/role. `admin` has full access, including managing other accounts; `staff` can manage Residents & Executives but not accounts.
 
 ## API
 
@@ -71,8 +71,9 @@ Running it again for an existing username updates that user's password/role.
 | Executives  | `GET/POST /api/executives`, `GET /api/executives/active-count`, `PUT/DELETE /api/executives/:id` | required (except active-count) |
 | Properties  | `GET/POST /api/properties`, `PUT/DELETE /api/properties/:id` | — |
 | Payments    | `GET/POST /api/payments` | — |
+| Contact     | `POST /api/contact` | — |
 
-Residents and Executives endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords, Management, and User Accounts pages are likewise only visible/usable to signed-in users.
+Residents and Executives endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords, Management, and User Accounts pages are likewise only visible/usable to signed-in users (User Accounts further requires the `admin` role).
 
 ## Scripts
 
