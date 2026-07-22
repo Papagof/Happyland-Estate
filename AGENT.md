@@ -9,12 +9,15 @@ Single Next.js 15 App Router app — not a monorepo, not two deployable services
 - `backend/` — server-only code, never imported by client components
   - `db.js` — the shared `pg` `Pool` singleton (`export default pool`)
   - `auth.js` — `getUser(request)`, `requireAuth(request)`, `requireAdmin(request)` — JWT verification against `process.env.JWT_SECRET`
-  - `supabase.js` — `createSupabaseClient()` / `createSupabaseAdminClient()`, **not called anywhere yet**. The app's real data layer is still `db.js` + `auth.js`. Don't assume Supabase is live without checking.
-  - `schema.sql` — the only source of truth for table shape; there is no ORM
+  - `supabase.js` — `createClient()` (async, cookie-aware, for Server Components/Server Actions/Route Handlers) and `createAdminClient()` (secret key, bypasses RLS). **Not called by any route yet** — the app's real data layer is still `db.js` + `auth.js`. The Supabase project itself is live and reachable (verified), but nothing in the app queries it. Don't assume a feature is Supabase-backed without checking.
+  - `supabaseMiddleware.js` — `updateSupabaseSession(request)`, called from the root `middleware.js`. Refreshes the Supabase auth cookie on every request so Server Components don't see a stale session — this is plumbing, not route protection. It does not redirect unauthenticated requests anywhere; add that deliberately if/when a page actually depends on a Supabase session.
+  - `schema.sql` — the only source of truth for Postgres table shape; there is no ORM
   - `scripts/create-user.js` — run with `node backend/scripts/create-user.js <username> <password> [admin|staff]`
-  - `supabase/` — local Supabase CLI config from `supabase init` (no Docker on this machine, so no live local stack — CLI use is limited to project linking/migrations against a remote project)
+  - `supabase/` — local Supabase CLI config from `supabase init` (no Docker on this machine, so no live local stack — CLI use is limited to project linking/migrations against the remote project)
+- `middleware.js` (project root, required Next.js filename — can't be moved into `backend/`) — thin wrapper calling `updateSupabaseSession`
 - `frontend/` — client-only code (everything here assumes it runs in the browser)
   - `lib/api-client.js` — the only place `fetch('/api/...')` should be called from pages; every resource has a `xApi` object (`residentsApi`, `executivesApi`, etc.) with `list/create/update/remove` methods
+  - `lib/supabaseClient.js` — `createClient()`, a browser-side Supabase client (publishable key only). Not imported anywhere yet — same "scaffolding, not wired in" caveat as `backend/supabase.js`.
   - `lib/useInView.js` / `lib/useCountUp.js` — animation hooks (IntersectionObserver-based reveal, and a `requestAnimationFrame` count-up), used by the homepage
   - `context/` — `AuthContext.jsx`/`auth-context.js`/`useAuth.js` (auth) and `ThemeContext.jsx`/`theme-context.js`/`useTheme.js` (light/dark mode) — each kept as three files (provider, raw context, hook) on purpose, don't collapse them
   - `components/` — `Navbar.jsx` (nav items + visibility rules live in its `NAV_ITEMS` array), `ThemeToggle.jsx` (sun/moon switch, lives in the navbar), `LoginForm.jsx` (rendered inline by pages that require auth, not routed to directly)
@@ -58,7 +61,13 @@ Two roles, both on the `users.role` column: `admin` (full access, including mana
 
 ## Environment
 
-Copy `.env.local.example` → `.env.local`. Required: `PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`/`PGDATABASE`, `JWT_SECRET`. The `NEXT_PUBLIC_SUPABASE_*` / `SUPABASE_SERVICE_ROLE_KEY` vars are optional placeholders for the unused `backend/supabase.js` client — leaving them blank is fine.
+Copy `.env.local.example` → `.env.local`. Required: `PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`/`PGDATABASE`, `JWT_SECRET`. `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set to a real project (Settings > API in the Supabase dashboard) and are what powers `middleware.js`, `backend/supabase.js`, and `frontend/lib/supabaseClient.js` — but no feature actually depends on them yet, so leaving them blank only disables that scaffolding, not the app. `SUPABASE_SECRET_KEY` is optional and only needed if server code needs to bypass RLS — never expose it to the browser.
+
+Note the current Supabase key naming: **publishable key** (`sb_publishable_...`, browser-safe) and **secret key** (`sb_secret_...`, server-only) replaced the older "anon key" / "service_role key" terminology. Don't reintroduce `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `SUPABASE_SERVICE_ROLE_KEY` — those are the legacy names.
+
+Two gotchas hit while wiring this up, worth knowing before touching it again:
+- Supabase's official Next.js example (as of writing) uses a root `proxy.ts` file with `export async function proxy()` instead of `middleware.ts`/`export function middleware()`. That's from Next.js's canary channel — **this project's installed Next.js (15.5.21) does not recognize `proxy.ts` at all** (verified against `node_modules/next/dist/lib/constants.js`, which only defines `MIDDLEWARE_FILENAME`). Stick with `middleware.js` + `export function middleware()` unless Next.js is upgraded and this is re-verified.
+- Current Supabase guidance is to call `supabase.auth.getClaims()` in server code (middleware, Server Components) rather than `getSession()` (unions/spoofable) or plain `getUser()`. This is what `backend/supabaseMiddleware.js` does to trigger the token-refresh side effect.
 
 Postgres itself runs locally as a Windows service (`postgresql-x64-18`); `psql` is not on PATH by default, use the full path under `C:\Program Files\PostgreSQL\18\bin\` if needed.
 
