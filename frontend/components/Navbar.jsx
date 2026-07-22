@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, Home, Users, CreditCard, Info, Building, MapPin, LogIn, LogOut, UserCog } from 'lucide-react';
-import { useAuth } from '@/context/useAuth';
+import { useAuth } from '@/frontend/context/useAuth';
 import styles from './Navbar.module.css';
 
 const NAV_ITEMS = [

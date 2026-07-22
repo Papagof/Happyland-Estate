@@ -3,10 +3,26 @@
 A web app for managing residents/landlords, properties, estate management members,
 and service charge payments for Happyland Estate.
 
+Built with [Next.js 15](https://nextjs.org) (App Router), [Tailwind CSS](https://tailwindcss.com), and PostgreSQL. [Supabase](https://supabase.com) tooling is installed but not yet wired in — see [AGENT.md](AGENT.md).
+
+This is a single Next.js app — `app/` (routing) and `public/` (static assets) must stay at the project root, but everything else is split into `backend/` (server-only code) and `frontend/` (client-only code), both imported into `app/` via the `@/*` path alias.
+
 ## Project structure
 
-- `frontend/` — Vite + React app (UI)
-- `backend/` — Express API backed by PostgreSQL
+- `app/` — pages and API routes (App Router); imports everything below via `@/backend/*` and `@/frontend/*`
+  - `app/api/` — REST endpoints backed by PostgreSQL
+- `backend/` — server-only code
+  - `db.js` — PostgreSQL connection pool
+  - `auth.js` — JWT auth helpers (`requireAuth`, `requireAdmin`)
+  - `supabase.js` — Supabase client factory (unused today, scaffolding only)
+  - `schema.sql` — PostgreSQL schema
+  - `scripts/create-user.js` — admin/authorized account creation script
+  - `supabase/` — Supabase CLI local config (`supabase init` output)
+- `frontend/` — client-only code
+  - `lib/api-client.js` — fetch wrapper for `/api/*`
+  - `context/` — auth context/provider/hook
+  - `components/` — shared UI components
+  - `styles/globals.css` — Tailwind entrypoint + global styles
 
 ## Setup
 
@@ -19,13 +35,14 @@ createdb happyland_estate
 psql -d happyland_estate -f backend/schema.sql
 ```
 
-### 2. Backend
+(On Windows, if `psql` isn't on your PATH, use the full path from your PostgreSQL install, e.g. `"C:\Program Files\PostgreSQL\18\bin\psql.exe"`.)
+
+### 2. App
 
 ```sh
-cd backend
-cp .env.example .env   # edit with your PostgreSQL credentials, and set JWT_SECRET
 npm install
-npm run dev             # runs on http://localhost:4000
+cp .env.local.example .env.local   # edit with your PostgreSQL credentials, and set JWT_SECRET
+npm run dev                        # runs on http://localhost:3000
 ```
 
 Generate a `JWT_SECRET` with:
@@ -36,30 +53,30 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 #### Creating admin / authorized logins
 
-The Residents & Landlords and Management pages require signing in. Create accounts with:
+The Residents & Landlords, Management, and User Accounts pages require signing in. Create accounts with:
 
 ```sh
-node scripts/create-user.js <username> <password> [admin|authorized]
+node backend/scripts/create-user.js <username> <password> [admin|authorized]
 ```
 
 Running it again for an existing username updates that user's password/role.
-
-### 3. Frontend
-
-```sh
-cd frontend
-npm install
-npm run dev              # runs on http://localhost:5173, proxies /api to the backend
-```
 
 ## API
 
 | Resource    | Endpoints | Auth |
 |-------------|-----------|------|
 | Auth        | `POST /api/auth/login` | — |
+| Users       | `GET/POST /api/users`, `DELETE /api/users/:id` | admin |
 | Residents   | `GET/POST /api/residents`, `PUT/DELETE /api/residents/:id` | required |
-| Executives  | `GET/POST /api/executives`, `PUT/DELETE /api/executives/:id` | required |
+| Executives  | `GET/POST /api/executives`, `GET /api/executives/active-count`, `PUT/DELETE /api/executives/:id` | required (except active-count) |
 | Properties  | `GET/POST /api/properties`, `PUT/DELETE /api/properties/:id` | — |
 | Payments    | `GET/POST /api/payments` | — |
 
-Residents and Executives endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`. The frontend's Residents & Landlords and Management pages are likewise only visible/usable to signed-in admin/authorized users.
+Residents and Executives endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords, Management, and User Accounts pages are likewise only visible/usable to signed-in users.
+
+## Scripts
+
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm run start` — run the production build
+- `npm run lint` — lint with ESLint

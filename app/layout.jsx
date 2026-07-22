@@ -1,6 +1,6 @@
-import { AuthProvider } from '@/context/AuthContext';
-import Navbar from '@/components/Navbar';
-import './globals.css';
+import { AuthProvider } from '@/frontend/context/AuthContext';
+import Navbar from '@/frontend/components/Navbar';
+import '@/frontend/styles/globals.css';
 
 export const metadata = {
   title: 'Happyland Estate',

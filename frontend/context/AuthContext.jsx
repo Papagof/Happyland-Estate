@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { authApi, getToken, setToken, clearToken } from '@/lib/api-client';
+import { authApi, getToken, setToken, clearToken } from '@/frontend/lib/api-client';
 import { AuthContext } from './auth-context';
 
 const USER_KEY = 'happyland_user';

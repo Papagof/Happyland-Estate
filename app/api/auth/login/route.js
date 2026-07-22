@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import pool from '@/lib/db';
+import pool from '@/backend/db';
 
 export async function POST(request) {
   const { username, password } = await request.json();

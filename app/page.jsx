@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { residentsApi, executivesApi, propertiesApi } from '@/lib/api-client';
-import { useAuth } from '@/context/useAuth';
+import Image from 'next/image';
+import { residentsApi, executivesApi, propertiesApi } from '@/frontend/lib/api-client';
+import { useAuth } from '@/frontend/context/useAuth';
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
@@ -53,11 +54,16 @@ export default function HomePage() {
               Welcome to Happyland Estate - A premier residential community dedicated to providing a safe, comfortable, and thriving environment for all our residents and property owners.
             </p>
           </div>
-          <img
-            src="/estate-gate.jpg"
-            alt="Happyland Estate entrance gate"
-            style={{ flex: '1 1 320px', maxWidth: '480px', width: '100%', height: '300px', objectFit: 'cover', borderRadius: '12px', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.3)' }}
-          />
+          <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '480px', width: '100%', height: '300px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.3)' }}>
+            <Image
+              src="/estate-gate.jpg"
+              alt="Happyland Estate entrance gate"
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              style={{ objectFit: 'cover' }}
+              priority
+            />
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>

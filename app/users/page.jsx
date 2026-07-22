@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Trash2, UserPlus } from 'lucide-react';
-import { usersApi } from '@/lib/api-client';
-import { useAuth } from '@/context/useAuth';
-import LoginForm from '@/components/LoginForm';
+import { usersApi } from '@/frontend/lib/api-client';
+import { useAuth } from '@/frontend/context/useAuth';
+import LoginForm from '@/frontend/components/LoginForm';
 
 const emptyForm = { username: '', password: '', role: 'authorized' };
 

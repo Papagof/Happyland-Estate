@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import { requireAdmin } from '@/lib/auth';
+import pool from '@/backend/db';
+import { requireAdmin } from '@/backend/auth';
 
 export async function DELETE(request, { params }) {
   const { user, error } = requireAdmin(request);

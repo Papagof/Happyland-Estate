@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { propertiesApi } from '@/lib/api-client';
+import { propertiesApi } from '@/frontend/lib/api-client';
 
 const emptyForm = { streetName: '', houseNumber: '', type: 'rent', bedrooms: '', bathrooms: '', price: '', description: '', available: true };
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
-import { useAuth } from '@/context/useAuth';
+import { useAuth } from '@/frontend/context/useAuth';
 
 export default function LoginForm({ onSuccess }) {
   const { login } = useAuth();

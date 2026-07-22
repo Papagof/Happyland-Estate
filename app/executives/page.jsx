@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { executivesApi } from '@/lib/api-client';
-import { useAuth } from '@/context/useAuth';
-import LoginForm from '@/components/LoginForm';
+import { executivesApi } from '@/frontend/lib/api-client';
+import { useAuth } from '@/frontend/context/useAuth';
+import LoginForm from '@/frontend/components/LoginForm';
 
 const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true };
 

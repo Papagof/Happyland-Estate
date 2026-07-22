@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import pool from '@/lib/db';
-import { requireAdmin } from '@/lib/auth';
+import pool from '@/backend/db';
+import { requireAdmin } from '@/backend/auth';
 
 function toUser(row) {
   return { id: row.id, username: row.username, role: row.role, createdAt: row.created_at };

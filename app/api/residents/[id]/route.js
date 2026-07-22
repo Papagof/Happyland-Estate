@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import pool from '@/backend/db';
+import { requireAuth } from '@/backend/auth';
 
 function toResident(row) {
   return {

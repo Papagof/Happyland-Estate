@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
-import { residentsApi } from '@/lib/api-client';
-import { useAuth } from '@/context/useAuth';
-import LoginForm from '@/components/LoginForm';
+import { residentsApi } from '@/frontend/lib/api-client';
+import { useAuth } from '@/frontend/context/useAuth';
+import LoginForm from '@/frontend/components/LoginForm';
 
 const emptyForm = { name: '', phone: '', email: '', streetName: '', houseNumber: '', type: 'resident', occupation: '', moveInDate: '' };
 
