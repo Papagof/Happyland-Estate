@@ -144,11 +144,9 @@ export default function HomePage() {
                   <Card className="h-full border-t-4 border-t-emerald-500">
                     <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{member.name}</div>
                     <Badge color="emerald">{member.position}</Badge>
-                    {member.term && (
-                      <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-                        <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {member.term}
-                      </div>
-                    )}
+                    <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                      <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {member.startYear}-{member.endYear}
+                    </div>
                   </Card>
                 </Reveal>
               ))}

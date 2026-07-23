@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS executives (
   id             SERIAL PRIMARY KEY,
   name           TEXT NOT NULL,
   position       TEXT NOT NULL,
-  term           TEXT,
+  start_year     INTEGER NOT NULL,
+  end_year       INTEGER NOT NULL,
   phone          TEXT,
   is_active      BOOLEAN NOT NULL DEFAULT true,
   display_order  INTEGER NOT NULL DEFAULT 0

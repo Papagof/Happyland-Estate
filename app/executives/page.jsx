@@ -11,31 +11,27 @@ import Select from '@/frontend/components/ui/Select';
 import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 
-const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true, displayOrder: 0 };
+const emptyForm = { name: '', position: '', startYear: '', endYear: '', phone: '', isActive: true, displayOrder: 0 };
 
 const POSITIONS = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 
 function groupByTenure(list) {
-  const byTerm = new Map();
+  const byKey = new Map();
   for (const exec of list) {
-    const term = exec.term || '';
-    if (!byTerm.has(term)) byTerm.set(term, []);
-    byTerm.get(term).push(exec);
+    const key = `${exec.startYear}-${exec.endYear}`;
+    if (!byKey.has(key)) byKey.set(key, { startYear: exec.startYear, endYear: exec.endYear, members: [] });
+    byKey.get(key).members.push(exec);
   }
-  const groups = [...byTerm.entries()].map(([term, members]) => ({
-    term,
-    members: members.sort((a, b) => {
+  const groups = [...byKey.values()].map((group) => ({
+    ...group,
+    members: group.members.sort((a, b) => {
       const rankA = POSITIONS.indexOf(a.position);
       const rankB = POSITIONS.indexOf(b.position);
       const positionDiff = (rankA === -1 ? POSITIONS.length : rankA) - (rankB === -1 ? POSITIONS.length : rankB);
       return positionDiff !== 0 ? positionDiff : (a.displayOrder || 0) - (b.displayOrder || 0);
     })
   }));
-  groups.sort((a, b) => {
-    if (!a.term) return 1;
-    if (!b.term) return -1;
-    return b.term.localeCompare(a.term);
-  });
+  groups.sort((a, b) => b.startYear - a.startYear);
   return groups;
 }
 
@@ -54,7 +50,7 @@ export default function ExecutivesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!executiveForm.name || !executiveForm.position) return;
+    if (!executiveForm.name || !executiveForm.position || !executiveForm.startYear || !executiveForm.endYear) return;
     if (editingExecutive) {
       const updated = await executivesApi.update(editingExecutive.id, executiveForm);
       setExecutives(executives.map((ex) => (ex.id === editingExecutive.id ? updated : ex)));
@@ -101,17 +97,23 @@ export default function ExecutivesPage() {
               ))}
             </Select>
             {[
-              { placeholder: 'Term (e.g., 2023-2025)', key: 'term' },
-              { placeholder: 'Phone Number', key: 'phone' }
+              { placeholder: 'Start Year *', key: 'startYear' },
+              { placeholder: 'End Year *', key: 'endYear' }
             ].map(({ placeholder, key }) => (
               <Input
                 key={key}
-                type="text"
+                type="number"
                 placeholder={placeholder}
                 value={executiveForm[key]}
                 onChange={(e) => setExecutiveForm({ ...executiveForm, [key]: e.target.value })}
               />
             ))}
+            <Input
+              type="text"
+              placeholder="Phone Number"
+              value={executiveForm.phone}
+              onChange={(e) => setExecutiveForm({ ...executiveForm, phone: e.target.value })}
+            />
             <Input
               type="number"
               placeholder="Display Order (lower shows first)"
@@ -153,12 +155,12 @@ export default function ExecutivesPage() {
           return (
             <div key={heading} className="mt-10">
               <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">{heading}</h2>
-              {tenureGroups.map(({ term, members }, groupIdx) => (
-                <Reveal key={term || 'unspecified'} delay={groupIdx * 80}>
+              {tenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
+                <Reveal key={`${startYear}-${endYear}`} delay={groupIdx * 80}>
                   <div className="mb-8">
                     {tenureGroups.length > 1 && (
                       <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                        {term || 'Unspecified Term'}
+                        {startYear}-{endYear}
                       </h3>
                     )}
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,11 +172,9 @@ export default function ExecutivesPage() {
                               {executive.position}
                             </Badge>
                             <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
-                              {executive.term && (
-                                <div>
-                                  <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {executive.term}
-                                </div>
-                              )}
+                              <div>
+                                <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {executive.startYear}-{executive.endYear}
+                              </div>
                               {executive.phone && (
                                 <div>
                                   <strong className="text-slate-700 dark:text-slate-300">Phone:</strong> {executive.phone}

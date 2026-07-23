@@ -20,25 +20,23 @@ const AMENITIES = [
 const POSITION_ORDER = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 
 function groupByTenure(executives) {
-  const termOrder = [];
-  const byTerm = new Map();
+  const byKey = new Map();
   for (const exec of executives) {
-    const term = exec.term || 'Unspecified Term';
-    if (!byTerm.has(term)) {
-      byTerm.set(term, []);
-      termOrder.push(term);
-    }
-    byTerm.get(term).push(exec);
+    const key = `${exec.startYear}-${exec.endYear}`;
+    if (!byKey.has(key)) byKey.set(key, { startYear: exec.startYear, endYear: exec.endYear, members: [] });
+    byKey.get(key).members.push(exec);
   }
-  return termOrder.map((term) => ({
-    term,
-    members: [...byTerm.get(term)].sort((a, b) => {
+  const groups = [...byKey.values()].map((group) => ({
+    ...group,
+    members: group.members.sort((a, b) => {
       const rankA = POSITION_ORDER.indexOf(a.position);
       const rankB = POSITION_ORDER.indexOf(b.position);
       const positionDiff = (rankA === -1 ? POSITION_ORDER.length : rankA) - (rankB === -1 ? POSITION_ORDER.length : rankB);
       return positionDiff !== 0 ? positionDiff : (a.displayOrder || 0) - (b.displayOrder || 0);
     })
   }));
+  groups.sort((a, b) => b.startYear - a.startYear);
+  return groups;
 }
 
 export default function AboutPage() {
@@ -101,10 +99,12 @@ export default function AboutPage() {
             <Reveal>
               <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">Past Management</h2>
             </Reveal>
-            {tenureGroups.map(({ term, members }, groupIdx) => (
-              <Reveal key={term} delay={groupIdx * 80}>
+            {tenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
+              <Reveal key={`${startYear}-${endYear}`} delay={groupIdx * 80}>
                 <div className="mb-8">
-                  <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">{term}</h3>
+                  <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                    {startYear}-{endYear}
+                  </h3>
                   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {members.map((member) => (
                       <Card key={member.id} className="h-full border-t-4 border-t-slate-300 opacity-80 dark:border-t-slate-700">
