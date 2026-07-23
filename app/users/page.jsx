@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, UserPlus } from 'lucide-react';
+import { Trash2, UserPlus, KeyRound } from 'lucide-react';
 import { usersApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
 import LoginForm from '@/frontend/components/LoginForm';
@@ -19,6 +19,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [passwordEditId, setPasswordEditId] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     if (currentUser?.role !== 'admin') return;
@@ -46,6 +49,30 @@ export default function UsersPage() {
   const handleDelete = async (id) => {
     await usersApi.remove(id);
     setUsers(users.filter((u) => u.id !== id));
+  };
+
+  const startPasswordEdit = (id) => {
+    setPasswordEditId(id);
+    setNewPassword('');
+    setPasswordError('');
+  };
+
+  const cancelPasswordEdit = () => {
+    setPasswordEditId(null);
+    setNewPassword('');
+    setPasswordError('');
+  };
+
+  const handleChangePassword = async (e, id) => {
+    e.preventDefault();
+    setPasswordError('');
+    if (!newPassword) return;
+    try {
+      await usersApi.changePassword(id, newPassword);
+      cancelPasswordEdit();
+    } catch (err) {
+      setPasswordError(err.message);
+    }
   };
 
   return (
@@ -90,11 +117,36 @@ export default function UsersPage() {
                   <Badge color={u.role === 'admin' ? 'indigo' : 'emerald'} className="mb-4">
                     {u.role.toUpperCase()}
                   </Badge>
-                  {u.id !== currentUser.id && (
-                    <div className="flex border-t border-slate-100 pt-4 dark:border-slate-800">
-                      <Button variant="danger" className="flex-1" onClick={() => handleDelete(u.id)}>
-                        <Trash2 size={14} /> Delete
+
+                  {passwordEditId === u.id ? (
+                    <form onSubmit={(e) => handleChangePassword(e, u.id)} className="border-t border-slate-100 pt-4 dark:border-slate-800">
+                      <Input
+                        type="password"
+                        placeholder="New password *"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        autoFocus
+                      />
+                      {passwordError && <div className="mt-2 text-sm font-medium text-red-500">{passwordError}</div>}
+                      <div className="mt-3 flex gap-2">
+                        <Button type="submit" variant="success" className="flex-1">
+                          Save
+                        </Button>
+                        <Button type="button" variant="secondary" className="flex-1" onClick={cancelPasswordEdit}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+                      <Button variant="accent" className="flex-1" onClick={() => startPasswordEdit(u.id)}>
+                        <KeyRound size={14} /> Change Password
                       </Button>
+                      {u.id !== currentUser.id && (
+                        <Button variant="danger" className="flex-1" onClick={() => handleDelete(u.id)}>
+                          <Trash2 size={14} /> Delete
+                        </Button>
+                      )}
                     </div>
                   )}
                 </Card>

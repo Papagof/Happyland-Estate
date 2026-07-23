@@ -31,6 +31,7 @@ export const authApi = {
 export const usersApi = {
   list: () => request('/users'),
   create: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
+  changePassword: (id, password) => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify({ password }) }),
   remove: (id) => request(`/users/${id}`, { method: 'DELETE' })
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2, MapPin, Mail, Phone, MessageCircle } from 'lucide-react';
 import { contactApi } from '@/frontend/lib/api-client';
 import Card from '@/frontend/components/ui/Card';
 import Button from '@/frontend/components/ui/Button';
@@ -10,6 +10,18 @@ import Textarea from '@/frontend/components/ui/Textarea';
 import { labelClass } from '@/frontend/components/ui/fieldStyles';
 
 const emptyForm = { name: '', email: '', subject: '', message: '' };
+
+const OFFICE_ADDRESS = 'Happyland Estate Landlords and Residents Association, Oko-Ado, Lekki-Epe Expressway, Lagos';
+const CONTACT_EMAIL = 'contact@happylandestate.com';
+const PHONE_NUMBER = '+2348023136685';
+const WHATSAPP_LINK = 'https://wa.me/2348023136685';
+
+const CONTACT_DETAILS = [
+  { icon: MapPin, label: 'Office Address', value: OFFICE_ADDRESS },
+  { icon: Mail, label: 'Email', value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
+  { icon: Phone, label: 'Phone', value: PHONE_NUMBER, href: `tel:${PHONE_NUMBER}` },
+  { icon: MessageCircle, label: 'WhatsApp', value: PHONE_NUMBER, href: WHATSAPP_LINK }
+];
 
 export default function ContactPage() {
   const [formData, setFormData] = useState(emptyForm);
@@ -40,6 +52,33 @@ export default function ContactPage() {
         <p className="mt-3 text-slate-500 dark:text-slate-400">
           Have a question for the estate management team? Send us a message and we&apos;ll get back to you.
         </p>
+
+        <Card className="mt-8">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {CONTACT_DETAILS.map(({ icon: Icon, label, value, href }) => (
+              <div key={label} className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                  <Icon size={18} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">{label}</div>
+                  {href ? (
+                    <a
+                      href={href}
+                      target={href.startsWith('http') ? '_blank' : undefined}
+                      rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
+                    >
+                      {value}
+                    </a>
+                  ) : (
+                    <div className="text-sm text-slate-500 dark:text-slate-400">{value}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {submitted ? (
           <Card className="mt-8 animate-fade-in-up text-center">
