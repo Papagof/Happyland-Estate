@@ -15,6 +15,30 @@ const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true,
 
 const POSITIONS = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 
+function groupByTenure(list) {
+  const byTerm = new Map();
+  for (const exec of list) {
+    const term = exec.term || '';
+    if (!byTerm.has(term)) byTerm.set(term, []);
+    byTerm.get(term).push(exec);
+  }
+  const groups = [...byTerm.entries()].map(([term, members]) => ({
+    term,
+    members: members.sort((a, b) => {
+      const rankA = POSITIONS.indexOf(a.position);
+      const rankB = POSITIONS.indexOf(b.position);
+      const positionDiff = (rankA === -1 ? POSITIONS.length : rankA) - (rankB === -1 ? POSITIONS.length : rankB);
+      return positionDiff !== 0 ? positionDiff : (a.displayOrder || 0) - (b.displayOrder || 0);
+    })
+  }));
+  groups.sort((a, b) => {
+    if (!a.term) return 1;
+    if (!b.term) return -1;
+    return b.term.localeCompare(a.term);
+  });
+  return groups;
+}
+
 export default function ExecutivesPage() {
   const { isAuthenticated } = useAuth();
   const [executives, setExecutives] = useState([]);
@@ -125,43 +149,55 @@ export default function ExecutivesPage() {
           const isActive = sectionIdx === 0;
           const list = executives.filter((e) => e.isActive === isActive);
           if (list.length === 0) return null;
+          const tenureGroups = groupByTenure(list);
           return (
             <div key={heading} className="mt-10">
               <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">{heading}</h2>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {list.map((executive, idx) => (
-                  <Reveal key={executive.id} delay={Math.min(idx, 6) * 60}>
-                    <Card className={`h-full border-t-4 ${isActive ? 'border-t-emerald-500' : 'border-t-slate-300 opacity-80 dark:border-t-slate-700'}`}>
-                      <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{executive.name}</div>
-                      <Badge color={isActive ? 'emerald' : 'slate'} className="mb-4">
-                        {executive.position}
-                      </Badge>
-                      <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
-                        {executive.term && (
-                          <div>
-                            <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {executive.term}
-                          </div>
-                        )}
-                        {executive.phone && (
-                          <div>
-                            <strong className="text-slate-700 dark:text-slate-300">Phone:</strong> {executive.phone}
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-                        {isActive && (
-                          <Button variant="accent" className="flex-1" onClick={() => handleEdit(executive)}>
-                            Edit
-                          </Button>
-                        )}
-                        <Button variant="danger" className="flex-1" onClick={() => handleDelete(executive.id)}>
-                          Delete
-                        </Button>
-                      </div>
-                    </Card>
-                  </Reveal>
-                ))}
-              </div>
+              {tenureGroups.map(({ term, members }, groupIdx) => (
+                <Reveal key={term || 'unspecified'} delay={groupIdx * 80}>
+                  <div className="mb-8">
+                    {tenureGroups.length > 1 && (
+                      <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                        {term || 'Unspecified Term'}
+                      </h3>
+                    )}
+                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {members.map((executive, idx) => (
+                        <Reveal key={executive.id} delay={Math.min(idx, 6) * 60}>
+                          <Card className={`h-full border-t-4 ${isActive ? 'border-t-emerald-500' : 'border-t-slate-300 opacity-80 dark:border-t-slate-700'}`}>
+                            <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{executive.name}</div>
+                            <Badge color={isActive ? 'emerald' : 'slate'} className="mb-4">
+                              {executive.position}
+                            </Badge>
+                            <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
+                              {executive.term && (
+                                <div>
+                                  <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {executive.term}
+                                </div>
+                              )}
+                              {executive.phone && (
+                                <div>
+                                  <strong className="text-slate-700 dark:text-slate-300">Phone:</strong> {executive.phone}
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+                              {isActive && (
+                                <Button variant="accent" className="flex-1" onClick={() => handleEdit(executive)}>
+                                  Edit
+                                </Button>
+                              )}
+                              <Button variant="danger" className="flex-1" onClick={() => handleDelete(executive.id)}>
+                                Delete
+                              </Button>
+                            </div>
+                          </Card>
+                        </Reveal>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
             </div>
           );
         })}
