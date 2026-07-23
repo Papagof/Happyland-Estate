@@ -80,8 +80,6 @@ export default function Navbar() {
           <span className="hidden sm:inline">HAPPYLAND ESTATE</span>
         </div>
 
-        <nav className="hidden items-center gap-1 lg:flex">{navButtons}</nav>
-
         <div className="flex items-center gap-2">
           <div className="hidden lg:block">
             <ThemeToggle />
@@ -95,6 +93,8 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+
+      <nav className="mx-auto hidden max-w-6xl flex-wrap items-center justify-center gap-1 px-5 pb-3 lg:flex">{navButtons}</nav>
 
       <nav
         className={`grid gap-1 overflow-hidden border-t border-slate-200/80 px-5 transition-[grid-template-rows,opacity] duration-300 dark:border-slate-800/80 lg:hidden ${
