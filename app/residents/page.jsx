@@ -14,6 +14,23 @@ import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { name: '', phone: '', email: '', streetName: '', houseNumber: '', type: 'resident', occupation: '', moveInDate: '' };
 
+const STREET_NAMES = [
+  'Peace Close',
+  'Felicia Momoh Close',
+  'Achief Close',
+  'HalelluJah Close',
+  'John Agabri Road',
+  'Saluala Kadiku Street',
+  'Cedar Street',
+  'Maple Street',
+  'Samuel Ukpong Street',
+  'Oladoyin Ishola',
+  'Alhaji Ekemode Street',
+  'Sanyaolu Close',
+  'Favour Honour Street',
+  'Alhaji Ariyo Street'
+];
+
 export default function ResidentsPage() {
   const { isAuthenticated } = useAuth();
   const [residents, setResidents] = useState([]);
@@ -64,8 +81,25 @@ export default function ResidentsPage() {
             {[
               { type: 'text', placeholder: 'Full Name *', key: 'name' },
               { type: 'tel', placeholder: 'Phone Number', key: 'phone' },
-              { type: 'email', placeholder: 'Email Address', key: 'email' },
-              { type: 'text', placeholder: 'Street Name *', key: 'streetName' },
+              { type: 'email', placeholder: 'Email Address', key: 'email' }
+            ].map(({ type, placeholder, key }) => (
+              <Input
+                key={key}
+                type={type}
+                placeholder={placeholder}
+                value={formData[key]}
+                onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+              />
+            ))}
+            <Select value={formData.streetName} onChange={(e) => setFormData({ ...formData, streetName: e.target.value })}>
+              <option value="">Street Name *</option>
+              {STREET_NAMES.map((street) => (
+                <option key={street} value={street}>
+                  {street}
+                </option>
+              ))}
+            </Select>
+            {[
               { type: 'text', placeholder: 'House Number *', key: 'houseNumber' },
               { type: 'text', placeholder: 'Occupation', key: 'occupation' },
               { type: 'date', placeholder: 'Move-in Date', key: 'moveInDate' }

@@ -12,6 +12,23 @@ import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { streetName: '', houseNumber: '', type: 'rent', bedrooms: '', bathrooms: '', price: '', description: '', available: true };
 
+const STREET_NAMES = [
+  'Peace Close',
+  'Felicia Momoh Close',
+  'Achief Close',
+  'HalelluJah Close',
+  'John Agabri Road',
+  'Saluala Kadiku Street',
+  'Cedar Street',
+  'Maple Street',
+  'Samuel Ukpong Street',
+  'Oladoyin Ishola',
+  'Alhaji Ekemode Street',
+  'Sanyaolu Close',
+  'Favour Honour Street',
+  'Alhaji Ariyo Street'
+];
+
 const TYPE_LABEL = { sale: 'FOR SALE', rent: 'FOR RENT', both: 'FOR RENT & SALE' };
 const TYPE_BANNER = {
   sale: 'bg-indigo-600',
@@ -48,12 +65,18 @@ export default function PropertiesPage() {
         <Card className="mt-8">
           <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Add New Property</h2>
           <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Select value={propertyForm.streetName} onChange={(e) => setPropertyForm({ ...propertyForm, streetName: e.target.value })}>
+              <option value="">Street Name *</option>
+              {STREET_NAMES.map((street) => (
+                <option key={street} value={street}>
+                  {street}
+                </option>
+              ))}
+            </Select>
             {[
-              { placeholder: 'Street Name *', key: 'streetName', type: 'text' },
               { placeholder: 'House Number *', key: 'houseNumber', type: 'text' },
               { placeholder: 'Bedrooms', key: 'bedrooms', type: 'number' },
-              { placeholder: 'Bathrooms', key: 'bathrooms', type: 'number' },
-              { placeholder: 'Price (₦)', key: 'price', type: 'number' }
+              { placeholder: 'Bathrooms', key: 'bathrooms', type: 'number' }
             ].map(({ placeholder, key, type }) => (
               <Input
                 key={key}
@@ -63,6 +86,13 @@ export default function PropertiesPage() {
                 onChange={(e) => setPropertyForm({ ...propertyForm, [key]: e.target.value })}
               />
             ))}
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="Price (₦)"
+              value={propertyForm.price ? Number(propertyForm.price).toLocaleString() : ''}
+              onChange={(e) => setPropertyForm({ ...propertyForm, price: e.target.value.replace(/[^\d]/g, '') })}
+            />
             <Select value={propertyForm.type} onChange={(e) => setPropertyForm({ ...propertyForm, type: e.target.value })}>
               <option value="rent">For Rent</option>
               <option value="sale">For Sale</option>

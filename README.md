@@ -66,7 +66,7 @@ Running it again for an existing username updates that user's password/role. `ad
 | Auth        | `POST /api/auth/login` | — |
 | Users       | `GET/POST /api/users`, `DELETE /api/users/:id` | admin |
 | Residents   | `GET/POST /api/residents`, `PUT/DELETE /api/residents/:id` | required |
-| Executives  | `GET/POST /api/executives`, `GET /api/executives/active-count`, `PUT/DELETE /api/executives/:id` | required (except active-count) |
+| Executives  | `GET/POST /api/executives`, `GET /api/executives/active-count`, `GET /api/executives/active`, `GET /api/executives/inactive`, `PUT/DELETE /api/executives/:id` | required (except active-count, active, inactive) |
 | Properties  | `GET/POST /api/properties`, `PUT/DELETE /api/properties/:id` | — |
 | Payments    | `GET/POST /api/payments` | — |
 | Contact     | `POST /api/contact` | — |

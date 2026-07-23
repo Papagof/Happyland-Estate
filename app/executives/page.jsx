@@ -7,10 +7,13 @@ import LoginForm from '@/frontend/components/LoginForm';
 import Card from '@/frontend/components/ui/Card';
 import Button from '@/frontend/components/ui/Button';
 import Input from '@/frontend/components/ui/Input';
+import Select from '@/frontend/components/ui/Select';
 import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 
 const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true };
+
+const POSITIONS = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 
 export default function ExecutivesPage() {
   const { isAuthenticated } = useAuth();
@@ -59,9 +62,21 @@ export default function ExecutivesPage() {
             {editingExecutive ? 'Edit Management Member' : 'Add Management Member'}
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Input
+              type="text"
+              placeholder="Full Name *"
+              value={executiveForm.name}
+              onChange={(e) => setExecutiveForm({ ...executiveForm, name: e.target.value })}
+            />
+            <Select value={executiveForm.position} onChange={(e) => setExecutiveForm({ ...executiveForm, position: e.target.value })}>
+              <option value="">Position *</option>
+              {POSITIONS.map((position) => (
+                <option key={position} value={position}>
+                  {position}
+                </option>
+              ))}
+            </Select>
             {[
-              { placeholder: 'Full Name *', key: 'name' },
-              { placeholder: 'Position *', key: 'position' },
               { placeholder: 'Term (e.g., 2023-2025)', key: 'term' },
               { placeholder: 'Phone Number', key: 'phone' }
             ].map(({ placeholder, key }) => (
