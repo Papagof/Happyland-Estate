@@ -11,7 +11,7 @@ import Select from '@/frontend/components/ui/Select';
 import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 
-const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true };
+const emptyForm = { name: '', position: '', term: '', phone: '', isActive: true, displayOrder: 0 };
 
 const POSITIONS = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 
@@ -88,6 +88,12 @@ export default function ExecutivesPage() {
                 onChange={(e) => setExecutiveForm({ ...executiveForm, [key]: e.target.value })}
               />
             ))}
+            <Input
+              type="number"
+              placeholder="Display Order (lower shows first)"
+              value={executiveForm.displayOrder}
+              onChange={(e) => setExecutiveForm({ ...executiveForm, displayOrder: e.target.value })}
+            />
             <label className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
               <input
                 type="checkbox"

@@ -9,7 +9,8 @@ function toExecutive(row) {
     position: row.position,
     term: row.term || '',
     phone: row.phone || '',
-    isActive: row.is_active
+    isActive: row.is_active,
+    displayOrder: row.display_order
   };
 }
 
@@ -25,15 +26,15 @@ export async function POST(request) {
   const { error } = requireAuth(request);
   if (error) return error;
 
-  const { name, position, term, phone, isActive } = await request.json();
+  const { name, position, term, phone, isActive, displayOrder } = await request.json();
   if (!name || !position) {
     return NextResponse.json({ error: 'name and position are required' }, { status: 400 });
   }
 
   const result = await pool.query(
-    `INSERT INTO executives (name, position, term, phone, is_active)
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [name, position, term || null, phone || null, isActive !== false]
+    `INSERT INTO executives (name, position, term, phone, is_active, display_order)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [name, position, term || null, phone || null, isActive !== false, Number(displayOrder) || 0]
   );
   return NextResponse.json(toExecutive(result.rows[0]), { status: 201 });
 }

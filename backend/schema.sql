@@ -22,12 +22,13 @@ CREATE TABLE IF NOT EXISTS residents (
 );
 
 CREATE TABLE IF NOT EXISTS executives (
-  id         SERIAL PRIMARY KEY,
-  name       TEXT NOT NULL,
-  position   TEXT NOT NULL,
-  term       TEXT,
-  phone      TEXT,
-  is_active  BOOLEAN NOT NULL DEFAULT true
+  id             SERIAL PRIMARY KEY,
+  name           TEXT NOT NULL,
+  position       TEXT NOT NULL,
+  term           TEXT,
+  phone          TEXT,
+  is_active      BOOLEAN NOT NULL DEFAULT true,
+  display_order  INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS properties (

@@ -35,7 +35,8 @@ function groupByTenure(executives) {
     members: [...byTerm.get(term)].sort((a, b) => {
       const rankA = POSITION_ORDER.indexOf(a.position);
       const rankB = POSITION_ORDER.indexOf(b.position);
-      return (rankA === -1 ? POSITION_ORDER.length : rankA) - (rankB === -1 ? POSITION_ORDER.length : rankB);
+      const positionDiff = (rankA === -1 ? POSITION_ORDER.length : rankA) - (rankB === -1 ? POSITION_ORDER.length : rankB);
+      return positionDiff !== 0 ? positionDiff : (a.displayOrder || 0) - (b.displayOrder || 0);
     })
   }));
 }
