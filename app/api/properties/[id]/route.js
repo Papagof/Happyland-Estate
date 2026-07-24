@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/backend/db';
+import { requireAuth } from '@/backend/auth';
 
 function toProperty(row) {
   return {
@@ -16,6 +17,9 @@ function toProperty(row) {
 }
 
 export async function PUT(request, { params }) {
+  const { error } = requireAuth(request);
+  if (error) return error;
+
   const { id } = await params;
   const { streetName, houseNumber, type, bedrooms, bathrooms, price, description, available } = await request.json();
   const result = await pool.query(
@@ -28,6 +32,9 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  const { error } = requireAuth(request);
+  if (error) return error;
+
   const { id } = await params;
   await pool.query('DELETE FROM properties WHERE id=$1', [id]);
   return new Response(null, { status: 204 });

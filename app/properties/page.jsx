@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { propertiesApi } from '@/frontend/lib/api-client';
+import { useAuth } from '@/frontend/context/useAuth';
 import Card from '@/frontend/components/ui/Card';
 import Button from '@/frontend/components/ui/Button';
 import Input from '@/frontend/components/ui/Input';
@@ -37,6 +38,7 @@ const TYPE_BANNER = {
 };
 
 export default function PropertiesPage() {
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [propertyForm, setPropertyForm] = useState(emptyForm);
 
@@ -62,6 +64,7 @@ export default function PropertiesPage() {
       <div className="mx-auto max-w-6xl">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Properties Available for Rent & Sale</h1>
 
+        {isAuthenticated && (
         <Card className="mt-8">
           <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Add New Property</h2>
           <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -118,6 +121,7 @@ export default function PropertiesPage() {
             </Button>
           </form>
         </Card>
+        )}
 
         {properties.length > 0 ? (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -158,9 +162,11 @@ export default function PropertiesPage() {
                     {property.description && (
                       <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{property.description}</p>
                     )}
-                    <Button variant="danger" className="w-full" onClick={() => handleDelete(property.id)}>
-                      <Trash2 size={14} /> Remove
-                    </Button>
+                    {isAuthenticated && (
+                      <Button variant="danger" className="w-full" onClick={() => handleDelete(property.id)}>
+                        <Trash2 size={14} /> Remove
+                      </Button>
+                    )}
                   </div>
                 </Card>
               </Reveal>

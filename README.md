@@ -67,11 +67,11 @@ Running it again for an existing username updates that user's password/role. `ad
 | Users       | `GET/POST /api/users`, `DELETE /api/users/:id` | admin |
 | Residents   | `GET/POST /api/residents`, `PUT/DELETE /api/residents/:id` | required |
 | Executives  | `GET/POST /api/executives`, `GET /api/executives/active-count`, `GET /api/executives/active`, `GET /api/executives/inactive`, `PUT/DELETE /api/executives/:id` | required (except active-count, active, inactive) |
-| Properties  | `GET/POST /api/properties`, `PUT/DELETE /api/properties/:id` | — |
+| Properties  | `GET/POST /api/properties`, `PUT/DELETE /api/properties/:id` | required (except GET) |
 | Payments    | `GET/POST /api/payments` | — |
 | Contact     | `POST /api/contact` | — |
 
-Residents and Executives endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords, Management, and User Accounts pages are likewise only visible/usable to signed-in users (User Accounts further requires the `admin` role).
+Residents, Executives, and property-write endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords, Management, and User Accounts pages are likewise only usable by signed-in users (User Accounts further requires the `admin` role) — the Properties page stays publicly viewable, but only signed-in users see the add/remove controls.
 
 ## Scripts
 

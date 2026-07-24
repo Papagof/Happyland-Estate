@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/backend/db';
+import { requireAuth } from '@/backend/auth';
 
 function toProperty(row) {
   return {
@@ -21,6 +22,9 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const { error } = requireAuth(request);
+  if (error) return error;
+
   const { streetName, houseNumber, type, bedrooms, bathrooms, price, description, available } = await request.json();
   if (!streetName || !houseNumber) {
     return NextResponse.json({ error: 'streetName and houseNumber are required' }, { status: 400 });
