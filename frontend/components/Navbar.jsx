@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: '/residents', label: 'Residents & Landlords', icon: Users, restricted: true },
   { href: '/payment', label: 'Service Charge', icon: CreditCard },
   { href: '/about', label: 'About Estate', icon: Info },
-  { href: '/executives', label: 'Management', icon: Building, restricted: true },
+  { href: '/executives', label: 'Management', icon: Building },
   { href: '/properties', label: 'Properties', icon: MapPin },
   { href: '/contact', label: 'Contact', icon: Mail },
   { href: '/users', label: 'User Accounts', icon: UserCog, adminOnly: true }

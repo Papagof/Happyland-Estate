@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { executivesApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
-import LoginForm from '@/frontend/components/LoginForm';
 import Card from '@/frontend/components/ui/Card';
 import Button from '@/frontend/components/ui/Button';
 import Input from '@/frontend/components/ui/Input';
@@ -35,6 +34,53 @@ function groupByTenure(list) {
   return groups;
 }
 
+function PublicManagementView() {
+  const [activeManagement, setActiveManagement] = useState([]);
+
+  useEffect(() => {
+    executivesApi.activeList().then(setActiveManagement);
+  }, []);
+
+  const tenureGroups = groupByTenure(activeManagement);
+
+  return (
+    <div className="px-5 py-12">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Estate Management</h1>
+
+        {tenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
+          <div key={`${startYear}-${endYear}`} className="mt-10">
+            {tenureGroups.length > 1 && (
+              <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">
+                {startYear}-{endYear}
+              </h2>
+            )}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {members.map((member, idx) => (
+                <Reveal key={member.id} delay={Math.min(idx, 6) * 60 + groupIdx * 80}>
+                  <Card className="h-full border-t-4 border-t-emerald-500">
+                    <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{member.name}</div>
+                    <Badge color="emerald" className="mb-4">
+                      {member.position}
+                    </Badge>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                      <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {member.startYear}-{member.endYear}
+                    </div>
+                  </Card>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {activeManagement.length === 0 && (
+          <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No management members added yet.</Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ExecutivesPage() {
   const { isAuthenticated } = useAuth();
   const [executives, setExecutives] = useState([]);
@@ -46,7 +92,7 @@ export default function ExecutivesPage() {
     executivesApi.list().then(setExecutives);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) return <LoginForm />;
+  if (!isAuthenticated) return <PublicManagementView />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
