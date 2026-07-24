@@ -9,6 +9,7 @@ Single Next.js 15 App Router app — not a monorepo, not two deployable services
 - `backend/` — server-only code, never imported by client components
   - `db.js` — the shared `pg` `Pool` singleton (`export default pool`)
   - `auth.js` — `getUser(request)`, `requireAuth(request)`, `requireAdmin(request)` — JWT verification against `process.env.JWT_SECRET`
+  - `rateLimit.js` — in-memory sliding-window limiter (`getClientKey`/`isRateLimited`/`recordFailedAttempt`/`clearAttempts`), used by `/api/auth/login` to block an IP after 5 failed attempts in 15 minutes. State lives in a module-level `Map`, so it resets on every server restart — fine for this app's traffic, wouldn't scale past a single process.
   - `schema.sql` — the only source of truth for Postgres table shape; there is no ORM
   - `scripts/create-user.js` — run with `node backend/scripts/create-user.js <username> <password> [admin|staff]`
 - `frontend/` — client-only code (everything here assumes it runs in the browser)
@@ -40,7 +41,7 @@ Dark mode is class-based (`@custom-variant dark (&:where(.dark, .dark *));`), to
 
 Two roles, both on the `users.role` column: `admin` (full access, including managing other accounts via `/api/users`) and `staff` (can manage Residents & Executives, cannot manage accounts). There is no third tier — a new permission boundary means a new role value plus a new `requireX` guard in `backend/auth.js`, not an ad-hoc check scattered in a route handler.
 
-- Login: `POST /api/auth/login` → bcrypt-compares against `users.password_hash`, signs a JWT with `{ sub, username, role }`, 12h expiry
+- Login: `POST /api/auth/login` → rate-limited via `backend/rateLimit.js` (5 failed attempts per IP per 15 min → `429`), then bcrypt-compares against `users.password_hash`, signs a JWT with `{ sub, username, role }`, 12h expiry
 - Client stores the token via `frontend/lib/api-client.js`'s `setToken`/`getToken`/`clearToken` (`localStorage` key `happyland_token`) and the user object via `AuthContext` (`localStorage` key `happyland_user`)
 - Every authenticated request goes through `frontend/lib/api-client.js`'s `request()`, which attaches `Authorization: Bearer <token>` automatically
 - Server-side: call `requireAuth(request)` for "any signed-in user" or `requireAdmin(request)` for "admin only" as the first line of a route handler; both return `{ user, error }` — return `error` immediately if present
@@ -63,3 +64,15 @@ Postgres itself runs locally as a Windows service (`postgresql-x64-18`); `psql` 
 ## Verifying a change
 
 Always run `npm run build` before considering a change done — it catches both compile errors and ESLint issues (`next lint` rules run as part of build). There's no test suite; manual verification via `npm run dev` is the only other check available.
+
+## Deployment (Hostinger)
+
+Production runs on Hostinger's Node.js app hosting (hPanel), pointed at the Supabase Postgres project via `PGHOST=aws-0-eu-west-1.pooler.supabase.com` (session pooler, port 5432, user `postgres.ppdvgtncowodlmkrxxpi`) — never the direct `db.<ref>.supabase.co` host, which is IPv6-only and unreachable from Hostinger. `JWT_SECRET` and all `PG*` vars are set directly in hPanel's environment variable UI, not committed anywhere.
+
+This setup has caused multiple real outages, always with the same symptom: the homepage still loads (served from a stale Next.js/CDN cache — check for `x-nextjs-cache: HIT` and a large `Age` header to confirm), while every other route, including login, returns `503`. Root causes so far:
+
+1. **Rebuilding while the app is still running** corrupts `.next` (old and new chunks coexist, causing `Cannot find module './NNN.js'` errors) — always **stop the app, then build, then start it**, never rebuild live.
+2. **Environment variables reset or mistyped** between deploys (e.g. `PGUSER`/`PGDATABASE` swapped) — if the site is up but every DB-backed request fails, re-verify the env vars against the values above before looking anywhere else.
+3. **A risky server-startup hook** (an earlier `instrumentation.js` that called `sharp.block()` unconditionally) was suspected of crashing the process on Hostinger's platform-specific `sharp` build; it was reverted along with a `postcss`/`sharp` dependency bump rather than root-caused, so those two `npm audit` findings are currently unresolved again — re-apply carefully (test the built app actually boots, don't add unguarded native-module calls to `instrumentation.js`) rather than blindly redoing the same commits.
+
+When the site is down: check hPanel's **runtime log** (not the build log) first — an empty runtime log means the process never started (check the build log instead, and confirm the app shows "Running"); a runtime log with a stack trace tells you exactly what crashed.
