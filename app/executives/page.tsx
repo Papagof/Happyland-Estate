@@ -10,7 +10,7 @@ import Select from '@/frontend/components/ui/Select';
 import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 
-const emptyForm = { name: '', position: '', startYear: '', endYear: '', phone: '', isActive: true, displayOrder: 0 };
+const emptyForm: Record<string, any> = { name: '', position: '', startYear: '', endYear: '', phone: '', isActive: true, displayOrder: 0 };
 
 const POSITIONS = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
 

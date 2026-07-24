@@ -1,9 +1,16 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { useInView } from '@/frontend/lib/useInView';
 
-export default function Reveal({ children, delay = 0, className = '' }) {
-  const [ref, inView] = useInView({ threshold: 0.15 });
+interface RevealProps {
+  children?: ReactNode;
+  delay?: number;
+  className?: string;
+}
+
+export default function Reveal({ children, delay = 0, className = '' }: RevealProps) {
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.15 });
 
   return (
     <div

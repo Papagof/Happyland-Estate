@@ -1,9 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, RefObject } from 'react';
 
-export function useInView({ threshold = 0.2, once = true } = {}) {
-  const ref = useRef(null);
+interface UseInViewOptions {
+  threshold?: number;
+  once?: boolean;
+}
+
+export function useInView<T extends HTMLElement = HTMLElement>({
+  threshold = 0.2,
+  once = true
+}: UseInViewOptions = {}): [RefObject<T | null>, boolean] {
+  const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {

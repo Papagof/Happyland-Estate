@@ -5,23 +5,23 @@ description: Use when adding a new CRUD-backed resource (a new database table wi
 
 # Add a CRUD resource
 
-This app has one consistent pattern for a resource backed by a Postgres table, a REST API, and a management page. Follow it exactly — don't introduce a new pattern (an ORM, a different response shape, a different auth style) for a single resource. `residents` is the canonical example to read alongside this skill: `backend/schema.sql`, `app/api/residents/route.js`, `app/api/residents/[id]/route.js`, `frontend/lib/api-client.js`, `app/residents/page.jsx`.
+This app has one consistent pattern for a resource backed by a Postgres table, a REST API, and a management page. Follow it exactly — don't introduce a new pattern (an ORM, a different response shape, a different auth style) for a single resource. `residents` is the canonical example to read alongside this skill: `backend/schema.sql`, `app/api/residents/route.ts`, `app/api/residents/[id]/route.ts`, `frontend/lib/api-client.ts`, `app/residents/page.tsx`.
 
 ## Steps
 
 1. **Table** — add a `CREATE TABLE IF NOT EXISTS` block to `backend/schema.sql`. Use `SERIAL PRIMARY KEY`, snake_case columns, `CHECK` constraints for enum-like fields (see `residents.type`), `BOOLEAN ... DEFAULT` for flags (see `properties.available`). This file is the only schema source — there's no migration tool or ORM.
 
-2. **List/create route** — `app/api/<resource>/route.js`:
+2. **List/create route** — `app/api/<resource>/route.ts`:
    - A private `to<Resource>(row)` function mapping snake_case DB columns to camelCase JSON keys (every route file has one, they're never shared/exported).
    - `export async function GET(request)` — call `requireAuth(request)` from `@/backend/auth` first and return `error` if present, unless the resource should be public (properties and payments are public today — check whether the new resource has the same intended visibility before adding an auth guard).
    - `export async function POST(request)` — same auth guard, validate required fields and return a 400 with `{ error: '...' }` if missing, then `pool.query` an `INSERT ... RETURNING *` with parameterized `$1, $2, ...`, respond `NextResponse.json(toResource(row), { status: 201 })`.
    - Import the pool from `@/backend/db`.
 
-3. **Update/delete route** — `app/api/<resource>/[id]/route.js`: same `to<Resource>` mapper duplicated (not imported — this is the existing convention, keep it), `export async function PUT(request, { params })` and `export async function DELETE(request, { params })`, both starting with `const { id } = await params;` (params is a Promise in this Next.js version — always `await` it).
+3. **Update/delete route** — `app/api/<resource>/[id]/route.ts`: same `to<Resource>` mapper duplicated (not imported — this is the existing convention, keep it), `export async function PUT(request, { params })` and `export async function DELETE(request, { params })`, both starting with `const { id } = await params;` (params is a Promise in this Next.js version — always `await` it).
 
-4. **Client methods** — add a `<resource>Api` object to `frontend/lib/api-client.js` with `list/create/update/remove` (and `count`/any custom read endpoint if needed, see `residentsApi.count` and `executivesApi.activeCount` for the pattern of a separate lightweight count route). Every method just calls the shared `request(path, options)` helper already defined in that file.
+4. **Client methods** — add a `<resource>Api` object to `frontend/lib/api-client.ts` with `list/create/update/remove` (and `count`/any custom read endpoint if needed, see `residentsApi.count` and `executivesApi.activeCount` for the pattern of a separate lightweight count route). Every method just calls the shared `request(path, options)` helper already defined in that file.
 
-5. **Page** — `app/<resource>/page.jsx`, `'use client'`. Copy the shape of `app/residents/page.jsx` for an authenticated CRUD page (guards on `useAuth()`, renders `<LoginForm />` if not authenticated) or `app/properties/page.jsx` for a public one: an `emptyForm` constant, `useState` for the list + form + (if editable) an `editingX` record, a `useEffect` that fetches on mount (or on `isAuthenticated` change), a form built from a small array of `{ type, placeholder, key }` field descriptors mapped to `<Input>`s, and a card grid rendering the list with Edit/Delete buttons.
+5. **Page** — `app/<resource>/page.tsx`, `'use client'`. Copy the shape of `app/residents/page.tsx` for an authenticated CRUD page (guards on `useAuth()`, renders `<LoginForm />` if not authenticated) or `app/properties/page.tsx` for a public one: an `emptyForm` constant, `useState` for the list + form + (if editable) an `editingX` record, a `useEffect` that fetches on mount (or on `isAuthenticated` change), a form built from a small array of `{ type, placeholder, key }` field descriptors mapped to `<Input>`s, and a card grid rendering the list with Edit/Delete buttons.
 
    Compose the page from the shared primitives in `frontend/components/ui/` — don't write new inline styles or new Tailwind color choices:
    - `Card` for the form panel and every list item (`import Card from '@/frontend/components/ui/Card'`)
@@ -31,7 +31,7 @@ This app has one consistent pattern for a resource backed by a Postgres table, a
 
    Every page and every primitive needs both a light styling and a `dark:` variant — check the new page in dark mode before considering it done (toggle via the navbar's theme button).
 
-6. **Nav entry** — add `{ href: '/<resource>', label: '...', icon: <LucideIcon>, restricted: true }` to `NAV_ITEMS` in `frontend/components/Navbar.jsx` (omit `restricted` for public resources, use `adminOnly: true` instead if it should match the Users page's admin-gating).
+6. **Nav entry** — add `{ href: '/<resource>', label: '...', icon: <LucideIcon>, restricted: true }` to `NAV_ITEMS` in `frontend/components/Navbar.tsx` (omit `restricted` for public resources, use `adminOnly: true` instead if it should match the Users page's admin-gating).
 
 ## Verify
 

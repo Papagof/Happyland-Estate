@@ -1,6 +1,10 @@
-import { forwardRef } from 'react';
+import { forwardRef, ReactNode, HTMLAttributes } from 'react';
 
-const Card = forwardRef(function Card({ className = '', children, ...props }, ref) {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  children?: ReactNode;
+}
+
+const Card = forwardRef<HTMLDivElement, CardProps>(function Card({ className = '', children, ...props }, ref) {
   return (
     <div
       ref={ref}

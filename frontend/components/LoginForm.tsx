@@ -8,7 +8,11 @@ import Card from '@/frontend/components/ui/Card';
 import Input from '@/frontend/components/ui/Input';
 import { labelClass } from '@/frontend/components/ui/fieldStyles';
 
-export default function LoginForm({ onSuccess }) {
+interface LoginFormProps {
+  onSuccess?: () => void;
+}
+
+export default function LoginForm({ onSuccess }: LoginFormProps) {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

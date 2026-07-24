@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ComponentType } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShieldCheck, Wrench, Trees, Sparkles, Users, CalendarDays, MapPin, Building, ArrowRight } from 'lucide-react';
@@ -21,8 +21,15 @@ const FEATURES = [
   { icon: CalendarDays, title: 'Community Events', description: 'Regular gatherings that keep neighbors connected year-round.' }
 ];
 
-function StatCard({ icon: Icon, value, label, delay }) {
-  const [ref, inView] = useInView({ threshold: 0.4 });
+interface StatCardProps {
+  icon: ComponentType<{ size?: number }>;
+  value: number;
+  label: string;
+  delay: number;
+}
+
+function StatCard({ icon: Icon, value, label, delay }: StatCardProps) {
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.4 });
   const displayValue = useCountUp(value, { start: inView, duration: 1400 });
 
   return (
