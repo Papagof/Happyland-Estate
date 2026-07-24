@@ -71,7 +71,7 @@ Running it again for an existing username updates that user's password/role. `ad
 | Payments    | `GET/POST /api/payments` | — |
 | Contact     | `POST /api/contact` | — |
 
-Residents, Executives, and property-write endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords and User Accounts pages are only usable by signed-in users (User Accounts further requires the `admin` role). The Properties and Management pages stay publicly viewable (current-only for Management), but only signed-in users see the add/edit/remove controls.
+Residents, Executives, and property-write endpoints require an `Authorization: Bearer <token>` header from `/api/auth/login`; Users endpoints additionally require the `admin` role. The Residents & Landlords and User Accounts pages are only usable by signed-in users (User Accounts further requires the `admin` role). The Properties and Management pages stay publicly viewable (Management shows both current and past), but only signed-in users see the add/edit/remove controls.
 
 ## Scripts
 

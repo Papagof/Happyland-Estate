@@ -36,21 +36,24 @@ function groupByTenure(list) {
 
 function PublicManagementView() {
   const [activeManagement, setActiveManagement] = useState([]);
+  const [pastManagement, setPastManagement] = useState([]);
 
   useEffect(() => {
     executivesApi.activeList().then(setActiveManagement);
+    executivesApi.inactiveList().then(setPastManagement);
   }, []);
 
-  const tenureGroups = groupByTenure(activeManagement);
+  const currentTenureGroups = groupByTenure(activeManagement);
+  const pastTenureGroups = groupByTenure(pastManagement);
 
   return (
     <div className="px-5 py-12">
       <div className="mx-auto max-w-6xl">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Estate Management</h1>
 
-        {tenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
+        {currentTenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
           <div key={`${startYear}-${endYear}`} className="mt-10">
-            {tenureGroups.length > 1 && (
+            {currentTenureGroups.length > 1 && (
               <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">
                 {startYear}-{endYear}
               </h2>
@@ -75,6 +78,31 @@ function PublicManagementView() {
 
         {activeManagement.length === 0 && (
           <Card className="mt-8 text-center text-slate-400 dark:text-slate-500">No management members added yet.</Card>
+        )}
+
+        {pastTenureGroups.length > 0 && (
+          <div className="mt-16">
+            <Reveal>
+              <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">Past Management</h2>
+            </Reveal>
+            {pastTenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
+              <Reveal key={`${startYear}-${endYear}`} delay={groupIdx * 80}>
+                <div className="mb-8">
+                  <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                    {startYear}-{endYear}
+                  </h3>
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {members.map((member) => (
+                      <Card key={member.id} className="h-full border-t-4 border-t-slate-300 opacity-80 dark:border-t-slate-700">
+                        <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{member.name}</div>
+                        <Badge color="slate">{member.position}</Badge>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -1,10 +1,4 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { executivesApi } from '@/frontend/lib/api-client';
 import Card from '@/frontend/components/ui/Card';
-import Badge from '@/frontend/components/ui/Badge';
-import Reveal from '@/frontend/components/ui/Reveal';
 
 const AMENITIES = [
   'Modern residential buildings with contemporary architecture',
@@ -17,37 +11,7 @@ const AMENITIES = [
   'School proximity and educational facilities'
 ];
 
-const POSITION_ORDER = ['Chairman', 'Vice Chairman', 'Secretary General', 'Treasurer', 'Financial Secretary', 'Welfare Secretary'];
-
-function groupByTenure(executives) {
-  const byKey = new Map();
-  for (const exec of executives) {
-    const key = `${exec.startYear}-${exec.endYear}`;
-    if (!byKey.has(key)) byKey.set(key, { startYear: exec.startYear, endYear: exec.endYear, members: [] });
-    byKey.get(key).members.push(exec);
-  }
-  const groups = [...byKey.values()].map((group) => ({
-    ...group,
-    members: group.members.sort((a, b) => {
-      const rankA = POSITION_ORDER.indexOf(a.position);
-      const rankB = POSITION_ORDER.indexOf(b.position);
-      const positionDiff = (rankA === -1 ? POSITION_ORDER.length : rankA) - (rankB === -1 ? POSITION_ORDER.length : rankB);
-      return positionDiff !== 0 ? positionDiff : (a.displayOrder || 0) - (b.displayOrder || 0);
-    })
-  }));
-  groups.sort((a, b) => b.startYear - a.startYear);
-  return groups;
-}
-
 export default function AboutPage() {
-  const [pastManagement, setPastManagement] = useState([]);
-
-  useEffect(() => {
-    executivesApi.inactiveList().then(setPastManagement);
-  }, []);
-
-  const tenureGroups = groupByTenure(pastManagement);
-
   return (
     <div className="px-5 py-12">
       <div className="mx-auto max-w-3xl">
@@ -93,31 +57,6 @@ export default function AboutPage() {
             every resident is part of a thriving, supportive environment.
           </p>
         </Card>
-
-        {tenureGroups.length > 0 && (
-          <div className="mt-10">
-            <Reveal>
-              <h2 className="mb-5 text-2xl font-bold text-slate-900 dark:text-white">Past Management</h2>
-            </Reveal>
-            {tenureGroups.map(({ startYear, endYear, members }, groupIdx) => (
-              <Reveal key={`${startYear}-${endYear}`} delay={groupIdx * 80}>
-                <div className="mb-8">
-                  <h3 className="mb-4 text-sm font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                    {startYear}-{endYear}
-                  </h3>
-                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {members.map((member) => (
-                      <Card key={member.id} className="h-full border-t-4 border-t-slate-300 opacity-80 dark:border-t-slate-700">
-                        <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{member.name}</div>
-                        <Badge color="slate">{member.position}</Badge>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import { ShieldCheck, Wrench, Trees, Sparkles, Users, CalendarDays, MapPin, Buil
 import { residentsApi, executivesApi, propertiesApi } from '@/frontend/lib/api-client';
 import { useAuth } from '@/frontend/context/useAuth';
 import Card from '@/frontend/components/ui/Card';
-import Badge from '@/frontend/components/ui/Badge';
 import Reveal from '@/frontend/components/ui/Reveal';
 import { buttonClasses } from '@/frontend/components/ui/Button';
 import { useInView } from '@/frontend/lib/useInView';
@@ -50,13 +49,11 @@ export default function HomePage() {
   const [activeExecutiveCount, setActiveExecutiveCount] = useState(0);
   const [residents, setResidents] = useState([]);
   const [executives, setExecutives] = useState([]);
-  const [activeManagement, setActiveManagement] = useState([]);
 
   useEffect(() => {
     propertiesApi.list().then(setProperties);
     residentsApi.count().then(({ count }) => setResidentCount(count));
     executivesApi.activeCount().then(({ count }) => setActiveExecutiveCount(count));
-    executivesApi.activeList().then(setActiveManagement);
   }, []);
 
   useEffect(() => {
@@ -131,28 +128,6 @@ export default function HomePage() {
           <StatCard icon={MapPin} value={properties.filter((p) => p.available).length} label="Available Properties" delay={100} />
           <StatCard icon={Building} value={displayActiveExecutiveCount} label="Active Management" delay={200} />
         </section>
-
-        {/* Active Management */}
-        {activeManagement.length > 0 && (
-          <section className="mt-16">
-            <Reveal>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Estate Management</h2>
-            </Reveal>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {activeManagement.map((member, idx) => (
-                <Reveal key={member.id} delay={Math.min(idx, 6) * 60}>
-                  <Card className="h-full border-t-4 border-t-emerald-500">
-                    <div className="mb-2.5 text-lg font-bold text-slate-900 dark:text-white">{member.name}</div>
-                    <Badge color="emerald">{member.position}</Badge>
-                    <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-                      <strong className="text-slate-700 dark:text-slate-300">Term:</strong> {member.startYear}-{member.endYear}
-                    </div>
-                  </Card>
-                </Reveal>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Features */}
         <section className="mt-16">
